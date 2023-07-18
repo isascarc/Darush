@@ -1,0 +1,95 @@
+using MyJob.DTOs;
+using Microsoft.AspNetCore.Mvc;
+using MyJob.Entities;
+using static System.Net.Mime.MediaTypeNames;
+using MyJob.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+
+namespace MyJob.Controllers;
+
+
+public class JobsController : BaseApiController
+{
+    public DataContext _context { get; }
+    public JobsController(DataContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet("test")]
+    public bool Test() => true;
+
+
+    [Authorize]
+    [HttpPost("create")]
+    public bool Create([FromBody] JobDto newJob)
+    {
+        Job newItem = new()
+        {
+            DateOfAdded = DateTime.Now,
+            haveToar = newJob.haveToar,
+            text = newJob.jobDetails,
+            EnglishNeed = newJob.haveEnglish,
+            salary = newJob.salary
+        };
+
+        _context.Jobs.Add(newItem);
+        int affectedRows = _context.SaveChanges();
+        return affectedRows > 0;
+    }
+
+
+    [HttpGet("GetJobById")]
+    public async Task<ActionResult<Job>> GetJobById(int JobId)
+    {
+        var job = await _context.Jobs.FirstOrDefaultAsync(x => (x.Id == JobId && (x.Deleted == false)));
+        return (job is null) ? NotFound() : job;
+    }
+
+    [HttpGet("GetJobs")]
+    public async Task<ActionResult<List<Job>>> GetJobs(bool haveToar, int salary, bool haveEnglish)
+    {
+        var salaryCond = _context.Jobs.Where(x => x.salary >= salary);
+        var res1 = (haveToar ? salaryCond : salaryCond.Where(x => x.haveToar == false));
+        var res2 = await (haveEnglish ? res1 : res1.Where(x => x.EnglishNeed == false)).ToListAsync();
+        return (res2.Count == 0) ? NotFound() : res2;
+    }
+
+    [Authorize]
+    [HttpDelete("DeleteJob/{JobId}")]
+    public async Task<bool> DeleteJobById(int JobId)
+    {
+        var job = await _context.Jobs.FirstAsync(x => x.Id == JobId);
+        job.Deleted = true;
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    [Authorize]
+    [HttpPut("FoundJob/{JobId}")]
+    public async Task<bool> FoundJob(int JobId, bool found)
+    {
+        var job = await _context.Jobs.FirstAsync(x => x.Id == JobId);
+        if (job.Found != found)
+        {
+            job.Found = found;
+            if (found)
+                job.FoundDate = DateTime.Now;
+        }
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    [Authorize]
+    [HttpPut("UpdateJob/{JobId}")]
+    public async Task<ActionResult<bool>> UpdateJob(int JobId, JobDto newJob)
+    {
+        var job = await _context.Jobs.FirstAsync(x => x.Id == JobId);
+        job.haveToar = newJob.haveToar;
+        job.EnglishNeed = newJob.haveEnglish;
+        job.text = newJob.jobDetails;
+        job.salary = newJob.salary;
+
+        // Update in DB
+        return (await _context.SaveChangesAsync() > 0) ? NoContent() : BadRequest("failed to update job");
+    }  
+
+}
