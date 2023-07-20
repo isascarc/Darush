@@ -7,7 +7,7 @@ public class CV
 {
     public int Id { get; set; }
     public string Text { get; set; }
-    public byte[] FileContent { get; set; } // עמודה לאחסון תוכן הקובץ בצורה של מערך ביטים
+    public byte[] FileContent { get; set; }
 
 
     public DateTime DateOfAdded { get; set; } = DateTime.Now;
