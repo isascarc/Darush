@@ -23,7 +23,9 @@ public class AccountController : BaseApiController
         _tokenService = tokenService;
     }
 
-    [HttpPost("register")] // post:  api/account/register
+
+    #region Register & login   
+    [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
 
@@ -59,9 +61,7 @@ public class AccountController : BaseApiController
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
         if (!computedHash.SequenceEqual(user.PasswordHash))
             return Unauthorized("invalid password!!");
-
        
-        _context.SaveChanges();
         return new UserDto
         {
             UserName = user.UserName ,
@@ -69,6 +69,75 @@ public class AccountController : BaseApiController
             KnownAs = user.KnownAs
         };
     }
+
+    #endregion
+
+    // [aut]
+    [HttpGet("Get-all-users")]
+    public async Task<ActionResult<List<object>>> GetAllUsers()
+    {
+        return Ok(await  _context.Users.Select(x => new { x.UserName , x.City, x.Create,x.Phone }).ToListAsync ());
+    }
+
+    //[HttpGet("Get-cv/{CvId}")]
+    //public async Task<ActionResult> GetCV(int CvId)
+    //{
+    //    // Check user   
+    //    var user = await GetUser();
+
+    //    if (user == null)
+    //        return NotFound();
+
+    //    var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
+    //    return (cv is null) ?
+    //        BadRequest("CV not exist")
+    //        :
+    //        new FileContentResult(cv.FileContent, Types["docx"])
+    //        // ToDo: Types[user.CVs[CvId].FileContent.FileName.Split(".").Last()])
+    //        {
+    //            FileDownloadName = cv.Name
+    //        };
+    //}
+
+
+    //[HttpPut("cv-Change-Name/{CvId}")]
+    //public async Task<ActionResult> CVChangeName(int CvId, string newName)
+    //{
+    //    var user = await GetUser();
+    //    if (user == null)
+    //        return NotFound();
+
+    //    if (GetAllActualCv(user).Count > CvId)
+    //        GetAllActualCv(user)[CvId].Name = newName;
+
+    //    return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+    //}
+
+
+    //[HttpDelete("delete-cv/{CvId}")]
+    //public async Task<ActionResult> DeleteCv(int CvId)
+    //{
+    //    // Check user
+    //    var user = await GetUser();
+    //    if (user == null)
+    //        return NotFound();
+
+
+    //    var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
+    //    if (cv is null)
+    //        return BadRequest("CV not exist");
+
+    //    // delete
+    //    cv.Deleted = true;
+    //    return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+    //}
+
+
+
+
+
+
+
 
     public async Task<bool> UserExist(string username)
     {

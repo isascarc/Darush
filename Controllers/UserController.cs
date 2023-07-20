@@ -4,11 +4,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyJob.Entities;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using MyJob.DTOs;
-using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
 
 namespace MyJob.Controllers;
 
@@ -19,13 +16,12 @@ public class UsersController : BaseApiController
     public ITokenService _tokenService { get; }
     private readonly IMapper _mapper;
 
-
     Dictionary<string, string> Types = new()
-        {
-            {"doc","application/msword" },
-            {"docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
-            {"pdf","application/pdf" }
-        };
+    {
+        {"doc","application/msword" },
+        {"docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+        {"pdf","application/pdf" }
+    };
 
     const int maxSizeInBytes = 100000;
     const int maxCVs = 5;
