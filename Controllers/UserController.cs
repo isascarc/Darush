@@ -17,6 +17,14 @@ public class UsersController : BaseApiController
     public ITokenService _tokenService { get; }
     private readonly IMapper _mapper;
 
+
+    Dictionary<string, string> Types = new()
+        {
+            {"doc","application/msword" },
+            {"docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+            {"pdf","application/pdf" }
+        };
+
     public UsersController(DataContext context, ITokenService tokenService, IMapper mapper)
     {
         _mapper = mapper;
@@ -24,11 +32,34 @@ public class UsersController : BaseApiController
         _tokenService = tokenService;
     }
 
-    //[HttpPost("view-cv")]
-    //public async Task<ActionResult> ViewCV([FromForm] CvDto cv)
-    //{
+    [HttpGet("Get-all-cvs")]
+    public async Task<ActionResult<List<CV>>> GetAllCVs()
+    {
+        // Check user
+        var user = await GetUser();
+        if (user == null)
+            return NotFound();
+        var a =   user.CVs.Where(x => !x.Deleted).ToList();
+        return Ok(a);
+    }
 
-    //} 
+    [HttpGet("Get-cv/{CvId}")]
+    public async Task<ActionResult> GetCV(int CvId)
+    {
+        // Check user
+        var user = await GetUser();
+
+        if (user == null)
+            return NotFound();
+
+        if (user.CVs.Count(x => !x.Deleted) > CvId)
+            return new FileContentResult(user.CVs[CvId].FileContent, Types["docx"])
+            // Types[user.CVs[CvId].FileContent.FileName.Split(".").Last()])
+            {
+                FileDownloadName = user.CVs[CvId].Name
+            };
+        return BadRequest("CV not exist");
+    }
 
     [HttpPut("set-cv-as-default/{CvId}")]
     public async Task<ActionResult> SetCVAsDefault(int CvId)
@@ -38,10 +69,12 @@ public class UsersController : BaseApiController
             return NotFound();
 
         if (user.CVs.Count > CvId)
+        {
+            user.CVs.ForEach(x => x.IsDefault = false);
             user.CVs[CvId].IsDefault = true;
+        }
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
-
 
 
     [HttpPost("add-cv")]
@@ -80,19 +113,21 @@ public class UsersController : BaseApiController
             });
         }
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem adding CV.");
+    }
+
+    [HttpDelete("delete-cv/{CvId}")]
+    public async Task<ActionResult> DeleteCv(int CvId)
+    {
+        // Check user
+        var user = await GetUser();
+        if (user == null)
+            return NotFound();
 
 
-
-
-        //var contentType = "image/jpeg";
-        //return new FileContentResult(user.CVs.Last().FileContent, contentType)
-        //{
-        //    FileDownloadName = "aa.png"
-        //};
-
-        //return user.CVs.Last().FileContent;
-
-        //return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem adding CV");
+        if (user.CVs.Count(x => !x.Deleted) > CvId)
+            user.CVs[CvId].Deleted = true;
+        
+        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");       
     }
 
     public async Task<AppUser> GetUser()

@@ -90,6 +90,5 @@ public class JobsController : BaseApiController
 
         // Update in DB
         return (await _context.SaveChangesAsync() > 0) ? NoContent() : BadRequest("failed to update job");
-    }  
-
+    } 
 }
