@@ -10,6 +10,7 @@ using MyJob.Entities;
 
 namespace MyJob.Controllers;
 
+// [aut]
 public class AccountController : BaseApiController
 {
     public DataContext _context { get; }
@@ -53,7 +54,7 @@ public class AccountController : BaseApiController
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await _context.Users.Include(x=>x.CVs ).
+        var user = await _context.Users.Include(x => x.CVs).
             FirstOrDefaultAsync(x => x.UserName == loginDto.UserName);
         if (user == null)
             return Unauthorized();
@@ -61,10 +62,10 @@ public class AccountController : BaseApiController
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
         if (!computedHash.SequenceEqual(user.PasswordHash))
             return Unauthorized("invalid password!!");
-       
+
         return new UserDto
         {
-            UserName = user.UserName ,
+            UserName = user.UserName,
             Token = _tokenService.CreateToken(user),
             KnownAs = user.KnownAs
         };
@@ -72,32 +73,22 @@ public class AccountController : BaseApiController
 
     #endregion
 
-    // [aut]
+
     [HttpGet("Get-all-users")]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
-        return Ok(await  _context.Users.Select(x => new { x.UserName , x.City, x.Create,x.Phone }).ToListAsync ());
+        return Ok(await _context.Users.Select(x => new {x.Id, x.UserName, x.City, x.Create, x.Phone, x.Deleted }).ToListAsync());
     }
 
-    //[HttpGet("Get-cv/{CvId}")]
-    //public async Task<ActionResult> GetCV(int CvId)
-    //{
-    //    // Check user   
-    //    var user = await GetUser();
+    [HttpGet("Get-User-Data/{UserId}")]
+    public async Task<ActionResult> GetUserData(int UserId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == UserId);
 
-    //    if (user == null)
-    //        return NotFound();
-
-    //    var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
-    //    return (cv is null) ?
-    //        BadRequest("CV not exist")
-    //        :
-    //        new FileContentResult(cv.FileContent, Types["docx"])
-    //        // ToDo: Types[user.CVs[CvId].FileContent.FileName.Split(".").Last()])
-    //        {
-    //            FileDownloadName = cv.Name
-    //        };
-    //}
+        if (user == null)
+            return NotFound();
+        return Ok(user);
+    }
 
 
     //[HttpPut("cv-Change-Name/{CvId}")]
@@ -114,28 +105,17 @@ public class AccountController : BaseApiController
     //}
 
 
-    //[HttpDelete("delete-cv/{CvId}")]
-    //public async Task<ActionResult> DeleteCv(int CvId)
-    //{
-    //    // Check user
-    //    var user = await GetUser();
-    //    if (user == null)
-    //        return NotFound();
+    [HttpDelete("delete/{UserId}")]
+    public async Task<ActionResult> Delete(int UserId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => (x.Id == UserId) && (x.Deleted == false));
 
+        if (user == null)
+            return NotFound();
+        user.Deleted = true;
 
-    //    var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
-    //    if (cv is null)
-    //        return BadRequest("CV not exist");
-
-    //    // delete
-    //    cv.Deleted = true;
-    //    return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
-    //}
-
-
-
-
-
+        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+    }
 
 
 

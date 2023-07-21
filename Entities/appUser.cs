@@ -16,7 +16,8 @@ namespace MyJob.Entities
         public string Phone { get; set; }
         public string LinkedinLink { get; set; }
         public string WebsiteLink { get; set; }
-         
+        public bool Deleted { get; set; } = false;
+
         public List<CV> CVs { get; set; } = new();
     }
 }
