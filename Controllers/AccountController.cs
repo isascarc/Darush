@@ -77,7 +77,21 @@ public class AccountController : BaseApiController
     [HttpGet("Get-all-users")]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
-        return Ok(await _context.Users.Select(x => new {x.Id, x.UserName, x.City, x.Create, x.Phone, x.Deleted }).ToListAsync());
+        return Ok(await _context.Users.Where(x => !x.Deleted).Select(x => new
+        {
+            x.Id,
+            x.UserName,
+            x.City,
+            x.Create,
+            x.Phone,
+            x.DateOfBirth,
+            x.Gender,
+            x.LastActive,
+            x.LinkedinLink,
+            x.Mail,
+            x.WebsiteLink,
+            x.Deleted
+        }).ToListAsync());
     }
 
     [HttpGet("Get-User-Data/{UserId}")]
@@ -90,6 +104,16 @@ public class AccountController : BaseApiController
         return Ok(user);
     }
 
+    [HttpPut("Update-User/{UserId}")]
+    public async Task<ActionResult> UpdateUser(int UserId, MemberUpdateDto memberUpdateDto)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == UserId);
+        if (user == null)
+            return NotFound();
+
+        _mapper.Map(memberUpdateDto, user);
+        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
+    }
 
     //[HttpPut("cv-Change-Name/{CvId}")]
     //public async Task<ActionResult> CVChangeName(int CvId, string newName)
