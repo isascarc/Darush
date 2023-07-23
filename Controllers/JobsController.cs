@@ -16,14 +16,15 @@ public class JobsController : BaseApiController
         _context = context;
     }
 
-    [HttpGet("test")]
-    public bool Test() => true;
-
-
     [Authorize]
-    [HttpPost("create")]
-    public bool Create([FromBody] JobDto newJob)
+    [HttpPost("create/{recId}")]
+    public async Task<ActionResult> Create(int recId, JobDto newJob)
     {
+        var rec = await _context.Recruiters.Include(x=>x.Jobs).FirstOrDefaultAsync(x => x.Id == recId);
+
+        if (rec == null)
+            return NotFound();
+
         Job newItem = new()
         {
             DateOfAdded = DateTime.Now,
@@ -32,12 +33,10 @@ public class JobsController : BaseApiController
             EnglishNeed = newJob.haveEnglish,
             salary = newJob.salary
         };
-
-        _context.Jobs.Add(newItem);
+        rec.Jobs.Add(newItem);
         int affectedRows = _context.SaveChanges();
-        return affectedRows > 0;
+        return Ok(affectedRows > 0);
     }
-
 
     [HttpGet("GetJobById")]
     public async Task<ActionResult<Job>> GetJobById(int JobId)
@@ -66,7 +65,7 @@ public class JobsController : BaseApiController
 
     [Authorize]
     [HttpPut("FoundJob/{JobId}")]
-    public async Task<bool> FoundJob(int JobId, bool found)
+    public async Task<bool> FoundJob(int JobId,[FromForm] bool found)
     {
         var job = await _context.Jobs.FirstAsync(x => x.Id == JobId);
         if (job.Found != found)
@@ -90,5 +89,5 @@ public class JobsController : BaseApiController
 
         // Update in DB
         return (await _context.SaveChangesAsync() > 0) ? NoContent() : BadRequest("failed to update job");
-    } 
+    }
 }

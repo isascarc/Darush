@@ -93,11 +93,11 @@ public class RecsController : BaseApiController
     [HttpGet("Get-rec-Data/{recId}")]
     public async Task<ActionResult> GetRecData(int recId)
     {
-        var user = await _context.Recruiters.FirstOrDefaultAsync(x => x.Id == recId);
+        var rec = await _context.Recruiters.FirstOrDefaultAsync(x => x.Id == recId);
 
-        if (user == null)
+        if (rec == null)
             return NotFound();
-        return Ok(user);
+        return Ok(rec);
     }
 
     [HttpPut("Update-rec/{recId}")]
