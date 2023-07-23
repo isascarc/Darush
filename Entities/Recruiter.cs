@@ -13,7 +13,8 @@ namespace MyJob.Entities
         public string Mail { get; set; }
         public string Phone { get; set; }
         public string LinkedinLink { get; set; }
-        
         public bool Deleted { get; set; } = false;
+
+        public List<Job> Jobs { get; set; }
     }
 }
