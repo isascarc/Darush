@@ -11,8 +11,8 @@ using MyJob.Data;
 namespace MyJob.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230722220540_recruiterAdded")]
-    partial class recruiterAdded
+    [Migration("20230723182420_AppInit")]
+    partial class AppInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,6 +73,34 @@ namespace MyJob.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MyJob.Entities.Applicant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Create")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CvId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("JobId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LinkedinLink")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.ToTable("Applicants");
+                });
+
             modelBuilder.Entity("MyJob.Entities.CV", b =>
                 {
                     b.Property<int>("Id")
@@ -128,6 +156,9 @@ namespace MyJob.Migrations
                     b.Property<DateTime>("FoundDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("RecruiterId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("haveToar")
                         .HasColumnType("INTEGER");
 
@@ -138,6 +169,8 @@ namespace MyJob.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RecruiterId");
 
                     b.ToTable("Jobs");
                 });
@@ -160,10 +193,16 @@ namespace MyJob.Migrations
                     b.Property<string>("Gender")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("InShort")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastActive")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LinkedinLink")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LogoProfile")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Mail")
@@ -186,6 +225,17 @@ namespace MyJob.Migrations
                     b.ToTable("Recruiters");
                 });
 
+            modelBuilder.Entity("MyJob.Entities.Applicant", b =>
+                {
+                    b.HasOne("MyJob.Entities.Job", "Job")
+                        .WithMany("Applicants")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Job");
+                });
+
             modelBuilder.Entity("MyJob.Entities.CV", b =>
                 {
                     b.HasOne("MyJob.Entities.AppUser", "AppUser")
@@ -197,9 +247,30 @@ namespace MyJob.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("MyJob.Entities.Job", b =>
+                {
+                    b.HasOne("MyJob.Entities.Recruiter", "recruiter")
+                        .WithMany("Jobs")
+                        .HasForeignKey("RecruiterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("recruiter");
+                });
+
             modelBuilder.Entity("MyJob.Entities.AppUser", b =>
                 {
                     b.Navigation("CVs");
+                });
+
+            modelBuilder.Entity("MyJob.Entities.Job", b =>
+                {
+                    b.Navigation("Applicants");
+                });
+
+            modelBuilder.Entity("MyJob.Entities.Recruiter", b =>
+                {
+                    b.Navigation("Jobs");
                 });
 #pragma warning restore 612, 618
         }

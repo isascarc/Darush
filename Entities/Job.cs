@@ -11,6 +11,8 @@ public class Job
     public bool Found { get; set; }
     public DateTime FoundDate { get; set; } = DateTime.UnixEpoch;
     public bool Deleted { get; set; }
+   
+    public List<Applicant > Applicants { get; set; } = new();
 
     public Recruiter recruiter { get; set; }
     public int RecruiterId { get; set; }

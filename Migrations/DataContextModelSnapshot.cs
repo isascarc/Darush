@@ -70,6 +70,34 @@ namespace MyJob.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MyJob.Entities.Applicant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Create")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CvId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("JobId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LinkedinLink")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.ToTable("Applicants");
+                });
+
             modelBuilder.Entity("MyJob.Entities.CV", b =>
                 {
                     b.Property<int>("Id")
@@ -162,10 +190,16 @@ namespace MyJob.Migrations
                     b.Property<string>("Gender")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("InShort")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastActive")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LinkedinLink")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LogoProfile")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Mail")
@@ -186,6 +220,17 @@ namespace MyJob.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Recruiters");
+                });
+
+            modelBuilder.Entity("MyJob.Entities.Applicant", b =>
+                {
+                    b.HasOne("MyJob.Entities.Job", "Job")
+                        .WithMany("Applicants")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Job");
                 });
 
             modelBuilder.Entity("MyJob.Entities.CV", b =>
@@ -213,6 +258,11 @@ namespace MyJob.Migrations
             modelBuilder.Entity("MyJob.Entities.AppUser", b =>
                 {
                     b.Navigation("CVs");
+                });
+
+            modelBuilder.Entity("MyJob.Entities.Job", b =>
+                {
+                    b.Navigation("Applicants");
                 });
 
             modelBuilder.Entity("MyJob.Entities.Recruiter", b =>

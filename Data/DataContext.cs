@@ -15,7 +15,7 @@ namespace MyJob.Data
         public DbSet<Recruiter> Recruiters { get; set; }
 
         public DbSet<CV> CVs { get; set; }
-        public DbSet<Job> Jobs { get; set; }
-
+        public DbSet<Job> Jobs { get; set; } 
+        public DbSet<Applicant> Applicants { get; set; }
     }
 }

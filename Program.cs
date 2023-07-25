@@ -1,6 +1,15 @@
 global using MyJob.Data;
 global using Microsoft.EntityFrameworkCore;
-using MyJob.Extensions;
+
+global using System.Security.Cryptography;
+global using System.Text;
+global using MyJob.DTOs;
+global using AutoMapper;
+global using Microsoft.AspNetCore.Mvc;
+global using MyJob.Interfaces;
+global using MyJob.Entities;
+global using System.Security.Claims;
+global using MyJob.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
