@@ -1,12 +1,4 @@
-using System.Security.Cryptography;
-using System.Text;
-using MyJob.DTOs;
-using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using MyJob.Interfaces;
-using MyJob.Entities;
 using System.Text.Json.Nodes;
-using System.Security.Claims;
 
 namespace MyJob.Controllers;
 

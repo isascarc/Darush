@@ -1,12 +1,5 @@
-using System.Security.Cryptography;
-using System.Text;
-using MyJob.DTOs;
-using AutoMapper;
 //using CloudinaryDotNet;
 //using CloudinaryDotNet.Actions;
-using Microsoft.AspNetCore.Mvc;
-using MyJob.Interfaces;
-using MyJob.Entities;
 
 namespace MyJob.Controllers;
 

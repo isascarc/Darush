@@ -1,8 +1,4 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
-using MyJob.Entities;
 
 namespace MyJob.Data;
 

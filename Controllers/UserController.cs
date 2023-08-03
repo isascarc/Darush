@@ -1,12 +1,3 @@
-using MyJob.Helpers;
-using MyJob.Interfaces;
-using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using MyJob.Entities;
-using System.Security.Claims;
-using MyJob.DTOs;
-
 namespace MyJob.Controllers;
 
 

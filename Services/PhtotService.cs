@@ -1,5 +1,4 @@
 using MyJob.Helpers;
-using MyJob.Interfaces;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;

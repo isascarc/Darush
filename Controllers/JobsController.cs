@@ -1,8 +1,3 @@
-using MyJob.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using MyJob.Entities;
-using static System.Net.Mime.MediaTypeNames;
-using MyJob.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MyJob.Controllers;

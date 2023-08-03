@@ -1,9 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using MyJob.Interfaces;
 using Microsoft.IdentityModel.Tokens;
-using MyJob.Entities;
 
 namespace MyJob.Services
 {

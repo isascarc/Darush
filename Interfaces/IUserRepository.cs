@@ -1,5 +1,3 @@
-using MyJob.DTOs;
-using MyJob.Entities;
 using MyJob.Helpers;
 
 namespace MyJob.Interfaces;
