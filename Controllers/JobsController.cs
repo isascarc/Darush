@@ -33,10 +33,10 @@ public class JobsController : BaseApiController
         return Ok(affectedRows > 0);
     }
 
-    [HttpGet("GetJobById")]
+    [HttpGet("GetJobById/{JobId}")]
     public async Task<ActionResult<Job>> GetJobById(int JobId)
     {
-        var job = await _context.Jobs.FirstOrDefaultAsync(x => (x.Id == JobId && (x.Deleted == false) && x.Found ==false ));
+        var job = await _context.Jobs.FirstOrDefaultAsync(x => (x.Id == JobId && (x.Deleted == false) && x.Found == false));
         return (job is null) ? NotFound() : job;
     }
 
@@ -81,7 +81,34 @@ public class JobsController : BaseApiController
         job.EnglishNeed = JobUpdate.haveEnglish;
         job.text = JobUpdate.jobDetails;
         job.salary = JobUpdate.salary;
-        // Update in DB
+
         return (await _context.SaveChangesAsync() > 0) ? NoContent() : BadRequest("failed to update job");
+    }
+
+    [Authorize]
+    [HttpPut("{JobId}/Applicants")]
+    public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
+    {
+        // Check user
+        var user = await GetUser();
+        if (user == null)
+            return Unauthorized();
+
+        // Todo: Add auth for rec
+        var job = await _context.Jobs.Include(x => x.Applicants).FirstAsync(x => x.Id == JobId);
+
+        return Ok(job.Applicants.Where(x => !x.Deleted).Select(x => new
+        {
+            x.Create,
+            x.CvId,
+            x.Id,
+            x.LinkedinLink,
+            x.UserId,
+        }));
+    }
+    public async Task<AppUser> GetUser()
+    {
+        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
     }
 }

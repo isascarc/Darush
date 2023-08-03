@@ -9,8 +9,11 @@ public class Applicant
     public DateTime Create { get; set; } = DateTime.Now;
     public string LinkedinLink { get; set; }
     public int CvId { get; set; }
-    public int UserId { get; set; }
+    public bool Deleted { get; set; }
 
+
+
+    public int UserId { get; set; }
     public Job Job { get; set; }
     public int JobId { get; set; }
 }

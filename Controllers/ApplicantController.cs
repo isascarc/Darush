@@ -21,6 +21,8 @@ public class ApplicantsController : BaseApiController
         var user = await GetUser();
         if (user == null)
             return Unauthorized();
+        if (user.CVs.Count < 1)
+            return NotFound("Please upload a resume.");
 
         var job = await _context.Jobs.Include(x => x.Applicants).FirstOrDefaultAsync(x => x.Id == JobId);
         if (job == null)
@@ -42,66 +44,37 @@ public class ApplicantsController : BaseApiController
     [HttpGet("Get-all-Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants()
     {
-        return Ok(await _context.Applicants.Select(x => new
+        return Ok(await _context.Applicants.Where(x => !x.Deleted).Select(x => new
         {
             x.Id,
+            x.JobId,
             x.Create,
             x.LinkedinLink,
             x.CvId,
+            x.UserId,
         }).ToListAsync());
     }
 
-    [HttpGet("Get-User-Data/{UserId}")]
-    public async Task<ActionResult> GetUserData(int UserId)
+    [HttpDelete("delete/{ApplicantId}")]
+    public async Task<ActionResult> Delete(int ApplicantId)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == UserId);
-
+        // Check user
+        var user = await GetUser();
         if (user == null)
-            return NotFound();
-        return Ok(user);
-    }
+            return Unauthorized();
 
-    [HttpPut("Update-User/{UserId}")]
-    public async Task<ActionResult> UpdateUser(int UserId, MemberUpdateDto memberUpdateDto)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == UserId);
-        if (user == null)
-            return NotFound();
+        var Applicant = await _context.Applicants.Where(x => x.Id == ApplicantId && x.UserId == user.Id && !x.Deleted).FirstOrDefaultAsync();
+        if (Applicant == null)
+            return NotFound("Applicant not exist.");
 
-        _mapper.Map(memberUpdateDto, user);
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
-    }
-
-    //[HttpPut("cv-Change-Name/{CvId}")]
-    //public async Task<ActionResult> CVChangeName(int CvId, string newName)
-    //{
-    //    var user = await GetUser();
-    //    if (user == null)
-    //        return NotFound();
-
-    //    if (GetAllActualCv(user).Count > CvId)
-    //        GetAllActualCv(user)[CvId].Name = newName;
-
-    //    return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
-    //}
-
-
-    [HttpDelete("delete/{UserId}")]
-    public async Task<ActionResult> Delete(int UserId)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(x => (x.Id == UserId) && (x.Deleted == false));
-
-        if (user == null)
-            return NotFound();
-        user.Deleted = true;
+        Applicant.Deleted = true;
 
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
-
     public async Task<AppUser> GetUser()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName);
+        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
     }
 }
