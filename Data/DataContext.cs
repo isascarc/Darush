@@ -1,7 +1,3 @@
-
-using Microsoft.EntityFrameworkCore;
-using MyJob.Entities;
-
 namespace MyJob.Data
 {
     public class DataContext : DbContext
