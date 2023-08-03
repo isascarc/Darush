@@ -86,7 +86,7 @@ public class JobsController : BaseApiController
     }
 
     [Authorize]
-    [HttpPut("{JobId}/Applicants")]
+    [HttpGet("{JobId}/Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
     {
         // Check user

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+
 namespace MyJob.Controllers;
 
 
@@ -41,7 +43,7 @@ public class UsersController : BaseApiController
     {
         // Check user   
         var user = await GetUser();
-        
+
         if (user == null)
             return NotFound();
 
@@ -70,7 +72,7 @@ public class UsersController : BaseApiController
         }
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
-    
+
     [HttpPut("cv-Change-Name/{CvId}")]
     public async Task<ActionResult> CVChangeName(int CvId, string newName)
     {
@@ -80,7 +82,7 @@ public class UsersController : BaseApiController
 
         if (GetAllActualCv(user).Count > CvId)
             GetAllActualCv(user)[CvId].Name = newName;
-        
+
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
@@ -137,6 +139,30 @@ public class UsersController : BaseApiController
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
+
+
+    [Authorize]
+    [HttpGet("Applicants")]
+    public async Task<ActionResult<List<object>>> GetAllApplicants()
+    {
+        // Check user
+        var user = await GetUser();
+        if (user == null)
+            return Unauthorized();
+
+        var Applicants = await _context.Applicants.Where(x => x.UserId == user.Id).Take(100).Select(x => new
+        {
+            x.Create,
+            x.CvId,
+            x.Id,
+            x.LinkedinLink,
+            x.UserId,
+        }).ToListAsync();
+
+        return Ok(Applicants);
+    }
+
+
     public async Task<AppUser> GetUser()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -145,6 +171,6 @@ public class UsersController : BaseApiController
 
     public List<CV> GetAllActualCv(AppUser user)
     {
-        return  user.CVs.Where(x => !x.Deleted).ToList();
+        return user.CVs.Where(x => !x.Deleted).ToList();
     }
 }
