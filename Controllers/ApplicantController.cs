@@ -20,41 +20,34 @@ public class ApplicantsController : BaseApiController
         // Check user
         var user = await GetUser();
         if (user == null)
-            return NotFound();
+            return Unauthorized();
 
         var job = await _context.Jobs.Include(x => x.Applicants).FirstOrDefaultAsync(x => x.Id == JobId);
         if (job == null)
-            return Unauthorized();
+            return NotFound("Job Not Found.");
 
-        job.Applicants.Add(
-            new()
-            {
-                LinkedinLink = user.LinkedinLink,
-                CvId = user.CVs.Where(x => x.IsDefault).First().Id,
-                UserId = user.Id
-            }
-            );
+        if (!job.Applicants.Any(x => x.UserId == user.Id))
+            job.Applicants.Add(
+                new()
+                {
+                    LinkedinLink = user.LinkedinLink,
+                    CvId = user.CVs.Where(x => x.IsDefault).First().Id,
+                    UserId = user.Id
+                }
+                );
 
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
+        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to Applicant user.");
     }
 
     [HttpGet("Get-all-Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants()
     {
-        return Ok(await _context.Users.Where(x => !x.Deleted).Select(x => new
+        return Ok(await _context.Applicants.Select(x => new
         {
             x.Id,
-            x.UserName,
-            x.City,
             x.Create,
-            x.Phone,
-            x.DateOfBirth,
-            x.Gender,
-            x.LastActive,
             x.LinkedinLink,
-            x.Mail,
-            x.WebsiteLink,
-            x.Deleted
+            x.CvId,
         }).ToListAsync());
     }
 
