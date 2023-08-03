@@ -20,7 +20,7 @@ public class RecsController : BaseApiController
     [HttpPost("register")]
     public async Task<ActionResult> Register(RegisterRecDto registerDto)
     {
-        if (await UserExist(registerDto.RecName))
+        if (await RecExist(registerDto.RecName))
             return BadRequest("username is taken");
 
         var user = _mapper.Map<Recruiter>(registerDto);
@@ -116,6 +116,6 @@ public class RecsController : BaseApiController
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
-    public async Task<bool> UserExist(string username)
+    public async Task<bool> RecExist(string username)
         => await _context.Recruiters.AnyAsync(x => x.RecName == username.ToLower()); 
 }

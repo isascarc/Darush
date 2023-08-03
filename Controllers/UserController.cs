@@ -16,7 +16,7 @@ public class UsersController : BaseApiController
 
     const int maxSizeInBytes = 100000;
     const int maxCVs = 5;
-    string[] SupportedFormats = new string[] { /*"doc",*/ "docx" };
+    readonly string[] SupportedFormats = new string[] { /*"doc",*/ "docx" };
 
     public UsersController(DataContext context, ITokenService tokenService, IMapper mapper)
     {

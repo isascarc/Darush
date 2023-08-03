@@ -11,3 +11,6 @@ global using MyJob.DTOs;
 global using MyJob.Interfaces;
 global using MyJob.Entities;
 global using MyJob.Extensions;
+
+//using CloudinaryDotNet;
+//using CloudinaryDotNet.Actions;

@@ -1,6 +1,3 @@
-//using CloudinaryDotNet;
-//using CloudinaryDotNet.Actions;
-
 namespace MyJob.Controllers;
 
 // [aut]
