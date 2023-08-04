@@ -5,11 +5,11 @@ namespace MyJob.Controllers;
 
 public class UsersController : BaseApiController
 {
-    public DataContext _context { get; }
-    public ITokenService _tokenService { get; }
+    public DataContext Context { get; }
+    public ITokenService TokenService { get; }
     private readonly IMapper _mapper;
 
-    Dictionary<string, string> Types = new()
+    readonly Dictionary<string, string> Types = new()
     {
         {"doc","application/msword" },
         {"docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
@@ -23,8 +23,8 @@ public class UsersController : BaseApiController
     public UsersController(DataContext context, ITokenService tokenService, IMapper mapper)
     {
         _mapper = mapper;
-        _context = context;
-        _tokenService = tokenService;
+        Context = context;
+        TokenService = tokenService;
     }
 
     [HttpGet("Get-all-cvs")]
@@ -70,7 +70,7 @@ public class UsersController : BaseApiController
             GetAllActualCv(user).ForEach(x => x.IsDefault = false);
             GetAllActualCv(user)[CvId].IsDefault = true;
         }
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
     [HttpPut("cv-Change-Name/{CvId}")]
@@ -83,7 +83,7 @@ public class UsersController : BaseApiController
         if (GetAllActualCv(user).Count > CvId)
             GetAllActualCv(user)[CvId].Name = newName;
 
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
 
@@ -118,7 +118,7 @@ public class UsersController : BaseApiController
                 IsDefault = !user.CVs.Any(x => !x.Deleted)
             });
         }
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem adding CV.");
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem adding CV.");
     }
 
     [HttpDelete("delete-cv/{CvId}")]
@@ -136,7 +136,7 @@ public class UsersController : BaseApiController
 
         // delete
         cv.Deleted = true;
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
 
@@ -150,7 +150,7 @@ public class UsersController : BaseApiController
         if (user == null)
             return Unauthorized();
 
-        var Applicants = await _context.Applicants.Where(x => x.UserId == user.Id).Take(100).Select(x => new
+        var Applicants = await Context.Applicants.Where(x => x.UserId == user.Id).Take(100).Select(x => new
         {
             x.Create,
             x.CvId,
@@ -166,7 +166,7 @@ public class UsersController : BaseApiController
     public async Task<AppUser> GetUser()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName);
+        return await Context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName);
     }
 
     public List<CV> GetAllActualCv(AppUser user)
