@@ -15,3 +15,12 @@ public class RegisterDto
     [StringLength(8, MinimumLength = 4)]
     public string password { get; set; }
 }
+
+public class RegisterDto2
+{
+    [Required] public string username { get; set; }
+    
+    [Required]
+    [StringLength(8, MinimumLength = 4)]
+    public string password { get; set; }
+}
