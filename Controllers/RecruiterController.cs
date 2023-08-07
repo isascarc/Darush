@@ -98,7 +98,7 @@ public class RecsController : BaseApiController
         var rec = await _context.Recruiters.FirstOrDefaultAsync(x => x.Id == recId);
         if (rec == null)
             return NotFound();
-
+        
         _mapper.Map(recUpdateDto, rec);
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
     }

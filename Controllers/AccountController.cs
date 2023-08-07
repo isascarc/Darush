@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+
 namespace MyJob.Controllers;
 
 // [aut]
@@ -87,7 +89,7 @@ public class AccountController : BaseApiController
 
     #endregion
 
-
+    [Authorize]
     [HttpGet("Get-all-users")]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
@@ -108,6 +110,7 @@ public class AccountController : BaseApiController
         }).ToListAsync());
     }
 
+    [Authorize]
     [HttpGet("Get-User-Data/{UserId}")]
     public async Task<ActionResult> GetUserData(int UserId)
     {
@@ -118,6 +121,7 @@ public class AccountController : BaseApiController
         return Ok(user);
     }
 
+    [Authorize]
     [HttpPut("Update-User/{UserId}")]
     public async Task<ActionResult> UpdateUser(int UserId, MemberUpdateDto memberUpdateDto)
     {
@@ -129,20 +133,7 @@ public class AccountController : BaseApiController
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
     }
 
-    //[HttpPut("cv-Change-Name/{CvId}")]
-    //public async Task<ActionResult> CVChangeName(int CvId, string newName)
-    //{
-    //    var user = await GetUser();
-    //    if (user == null)
-    //        return NotFound();
-
-    //    if (GetAllActualCv(user).Count > CvId)
-    //        GetAllActualCv(user)[CvId].Name = newName;
-
-    //    return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
-    //}
-
-
+    [Authorize]
     [HttpDelete("delete/{UserId}")]
     public async Task<ActionResult> Delete(int UserId)
     {
