@@ -43,7 +43,6 @@ public class UsersController : BaseApiController
     {
         // Check user   
         var user = await GetUser();
-
         if (user == null)
             return NotFound();
 
@@ -59,8 +58,8 @@ public class UsersController : BaseApiController
     }
 
     [HttpPut("set-cv-as-default/{CvId}")]
-    public async Task<ActionResult> SetCVAsDefault(int CvId)
-    {
+        public async Task<ActionResult> SetCVAsDefault(int CvId)
+        {
         var user = await GetUser();
         if (user == null)
             return NotFound();
