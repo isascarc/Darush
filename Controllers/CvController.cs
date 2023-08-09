@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 namespace MyJob.Controllers;
 
 
-public class UsersController : BaseApiController
+[Route("user/cv")]
+public class CvController : BaseApiController
 {
     public DataContext Context { get; }
     public ITokenService TokenService { get; }
@@ -20,7 +21,7 @@ public class UsersController : BaseApiController
     const int maxCVs = 5;
     readonly string[] SupportedFormats = new string[] { /*"doc",*/ "docx" };
 
-    public UsersController(DataContext context, ITokenService tokenService, IMapper mapper)
+    public CvController(DataContext context, ITokenService tokenService, IMapper mapper)
     {
         _mapper = mapper;
         Context = context;
