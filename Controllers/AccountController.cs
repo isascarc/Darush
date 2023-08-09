@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using MyJob.DTOs;
 
 namespace MyJob.Controllers;
 
@@ -7,7 +8,7 @@ public class AccountController : BaseApiController
 {
     public DataContext _context { get; }
     public ITokenService _tokenService { get; }
-    private readonly IMapper _mapper;
+    private IMapper _mapper;
 
     public AccountController(DataContext context, ITokenService tokenService, IMapper mapper)
     {
@@ -16,12 +17,11 @@ public class AccountController : BaseApiController
         _tokenService = tokenService;
     }
 
-
     #region Register & login   
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register2(RegisterDto2 registerDto)
     {
-        return await Register(new RegisterDto() { username = registerDto.username , password = registerDto.password });
+        return await Register(new RegisterDto() { username = registerDto.username, password = registerDto.password });
         if (await UserExist(registerDto.username))
             return BadRequest("username is taken");
 
@@ -71,9 +71,10 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
         var user = await _context.Users.Include(x => x.CVs).
-            FirstOrDefaultAsync(x => x.UserName == loginDto.UserName && !x.Deleted);
-        if (user == null)
-            return Unauthorized();
+           FirstOrDefaultAsync(x => x.UserName == loginDto.UserName && !x.Deleted);
+
+
+
         using var hmac = new HMACSHA512(user.PasswordSalt);
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
         if (!computedHash.SequenceEqual(user.PasswordHash))
@@ -93,6 +94,8 @@ public class AccountController : BaseApiController
     [HttpGet("Get-all-users")]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
+        var user = (await GetUserInfo()).Value;
+
         return Ok(await _context.Users.Where(x => !x.Deleted).Select(x => new
         {
             x.Id,
@@ -111,24 +114,33 @@ public class AccountController : BaseApiController
     }
 
     [Authorize]
-    [HttpGet("Get-User-Data/{UserId}")]
-    public async Task<ActionResult> GetUserData(int UserId)
+    [HttpGet("Get-User-Data")]
+    public async Task<ActionResult> GetUserData()
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == UserId);
-        
-        if (user == null)
-            return NotFound();
-        return Ok(user);
+        var x = (await GetUserInfo()).Value;
+        return Ok(new
+        {
+            x.Id,
+            x.UserName,
+            x.City,
+            x.Create,
+            x.Phone,
+            x.DateOfBirth,
+            x.Gender,
+            x.LastActive,
+            x.LinkedinLink,
+            x.Mail,
+            x.WebsiteLink,
+            x.Deleted
+        });
     }
 
     [Authorize]
-    [HttpPut("Update-User/{UserId}")]
-    public async Task<ActionResult> UpdateUser(int UserId, MemberUpdateDto memberUpdateDto)
+    [HttpPut("Update-User")]
+    public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == UserId);
-        if (user == null)
-            return NotFound();
-        
+        var user = (await GetUserInfo()).Value;
+
         _mapper.Map(memberUpdateDto, user);
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
     }
@@ -137,28 +149,26 @@ public class AccountController : BaseApiController
     [HttpDelete("delete")]
     public async Task<ActionResult> Delete()
     {
-        var user = await GetUser();
-        if (user == null)
-            return NotFound();
+        var user = (await GetUserInfo()).Value;
 
-        //var user = await _context.Users.FirstOrDefaultAsync(x => (x.Id == UserId) && (x.Deleted == false));
-
-        //if (user == null)
-        //    return NotFound();
         user.Deleted = true;
-
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
 
-    public async Task<AppUser> GetUser()
-    {
-        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName);
-    }
 
     public async Task<bool> UserExist(string username)
     {
         return await _context.Users.AnyAsync(x => x.UserName == username.ToLower());
+    }
+
+    public async Task<ActionResult<AppUser>> GetUserInfo()
+    {
+        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
+
+        if (user == null)
+            return Unauthorized();
+        return user;
     }
 }
