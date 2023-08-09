@@ -71,7 +71,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
         var user = await _context.Users.Include(x => x.CVs).
-            FirstOrDefaultAsync(x => x.UserName == loginDto.UserName);
+            FirstOrDefaultAsync(x => x.UserName == loginDto.UserName && !x.Deleted);
         if (user == null)
             return Unauthorized();
         using var hmac = new HMACSHA512(user.PasswordSalt);
@@ -128,25 +128,34 @@ public class AccountController : BaseApiController
         var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == UserId);
         if (user == null)
             return NotFound();
-
+        
         _mapper.Map(memberUpdateDto, user);
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
     }
 
     [Authorize]
-    [HttpDelete("delete/{UserId}")]
-    public async Task<ActionResult> Delete(int UserId)
+    [HttpDelete("delete")]
+    public async Task<ActionResult> Delete()
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => (x.Id == UserId) && (x.Deleted == false));
-
+        var user = await GetUser();
         if (user == null)
             return NotFound();
+
+        //var user = await _context.Users.FirstOrDefaultAsync(x => (x.Id == UserId) && (x.Deleted == false));
+
+        //if (user == null)
+        //    return NotFound();
         user.Deleted = true;
 
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
 
+    public async Task<AppUser> GetUser()
+    {
+        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName);
+    }
 
     public async Task<bool> UserExist(string username)
     {
