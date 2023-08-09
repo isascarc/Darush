@@ -28,24 +28,19 @@ public class CvController : BaseApiController
         TokenService = tokenService;
     }
 
-    [HttpGet("Get-all-cvs")]
+
+    [HttpGet("Get-all")]
     public async Task<ActionResult<List<object>>> GetAllCVs()
     {
-        // Check user
-        var user = await GetUser();
-        if (user == null)
-            return NotFound();
+        var user = (await GetUserInfo()).Value;
 
         return Ok(GetAllActualCv(user).Select(x => new { x.IsDefault, x.Name, x.DateOfAdded }).ToList());
     }
 
-    [HttpGet("Get-cv/{CvId}")]
+    [HttpGet("{CvId}")]
     public async Task<ActionResult> GetCV(int CvId)
     {
-        // Check user   
-        var user = await GetUser();
-        if (user == null)
-            return NotFound();
+        var user = (await GetUserInfo()).Value;
 
         var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
         return (cv is null) ?
@@ -76,24 +71,20 @@ public class CvController : BaseApiController
     [HttpPut("cv-Change-Name/{CvId}")]
     public async Task<ActionResult> CVChangeName(int CvId, string newName)
     {
-        var user = await GetUser();
-        if (user == null)
-            return NotFound();
+        var user = (await GetUserInfo()).Value;
 
         if (GetAllActualCv(user).Count > CvId)
             GetAllActualCv(user)[CvId].Name = newName;
-
+        StringCollection f = new StringCollection();
+        f.Add()
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
 
-    [HttpPost("add-cv")]
+    [HttpPost("add")]
     public async Task<ActionResult> AddCV([FromForm] CvDto cv)
     {
-        // Check user
-        var user = await GetUser();
-        if (user == null)
-            return NotFound();
+        var user = (await GetUserInfo()).Value;
 
         // Check file
         if (cv.File == null || cv.File.Length == 0)
@@ -121,7 +112,7 @@ public class CvController : BaseApiController
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem adding CV.");
     }
 
-    [HttpDelete("delete-cv/{CvId}")]
+    [HttpDelete("{CvId}")]
     public async Task<ActionResult> DeleteCv(int CvId)
     {
         // Check user
@@ -172,5 +163,15 @@ public class CvController : BaseApiController
     public List<CV> GetAllActualCv(AppUser user)
     {
         return user.CVs.Where(x => !x.Deleted).ToList();
+    }
+
+    async Task<ActionResult<AppUser>> GetUserInfo()
+    {
+        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = await Context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
+
+        if (user == null)
+            return Unauthorized();
+        return user;
     }
 }

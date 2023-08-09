@@ -72,7 +72,8 @@ public class AccountController : BaseApiController
     {
         var user = await _context.Users.Include(x => x.CVs).
            FirstOrDefaultAsync(x => x.UserName == loginDto.UserName && !x.Deleted);
-
+        if (user is null)
+            return Unauthorized("User not exist!!");
 
 
         using var hmac = new HMACSHA512(user.PasswordSalt);
