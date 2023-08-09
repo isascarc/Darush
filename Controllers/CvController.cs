@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using MyJob.Entities;
 
 namespace MyJob.Controllers;
 
@@ -10,6 +11,9 @@ public class CvController : BaseApiController
     public ITokenService TokenService { get; }
     private readonly IMapper _mapper;
 
+    const int maxSizeInBytes = 100000;
+    const int maxCVs = 5;
+    readonly string[] SupportedFormats = new string[] { /*"doc",*/ "docx" };
     readonly Dictionary<string, string> Types = new()
     {
         {"doc","application/msword" },
@@ -17,9 +21,7 @@ public class CvController : BaseApiController
         {"pdf","application/pdf" }
     };
 
-    const int maxSizeInBytes = 100000;
-    const int maxCVs = 5;
-    readonly string[] SupportedFormats = new string[] { /*"doc",*/ "docx" };
+
 
     public CvController(DataContext context, ITokenService tokenService, IMapper mapper)
     {
@@ -27,7 +29,6 @@ public class CvController : BaseApiController
         Context = context;
         TokenService = tokenService;
     }
-
 
     [HttpGet("Get-all")]
     public async Task<ActionResult<List<object>>> GetAllCVs()
@@ -54,11 +55,9 @@ public class CvController : BaseApiController
     }
 
     [HttpPut("set-cv-as-default/{CvId}")]
-        public async Task<ActionResult> SetCVAsDefault(int CvId)
-        {
-        var user = await GetUser();
-        if (user == null)
-            return NotFound();
+    public async Task<ActionResult> SetCVAsDefault(int CvId)
+    {
+        var user = (await GetUserInfo()).Value;
 
         if (GetAllActualCv(user).ElementAtOrDefault(CvId) is not null)
         {
@@ -74,9 +73,12 @@ public class CvController : BaseApiController
         var user = (await GetUserInfo()).Value;
 
         if (GetAllActualCv(user).Count > CvId)
+        {
+            if (user.CVs.Any(x => x.Name == cv.Name))
+                return BadRequest("A file with the same name already exists in your resume list.");
             GetAllActualCv(user)[CvId].Name = newName;
-        StringCollection f = new StringCollection();
-        f.Add()
+        }            
+
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
@@ -87,16 +89,18 @@ public class CvController : BaseApiController
         var user = (await GetUserInfo()).Value;
 
         // Check file
-        if (cv.File == null || cv.File.Length == 0)
+        if (cv.File is null || cv.File.Length < 1)
             return BadRequest("No file was uploaded.");
         if (cv.File.Length > maxSizeInBytes)
-            return BadRequest("File too large. The file must be up to 100 KB.");
+            return BadRequest($"File too large. The file must be up to {maxSizeInBytes/1000} KB.");
         if (!SupportedFormats.Contains(cv.File.FileName.Split(".").Last()))
             return BadRequest("The system only accepts files in Word format.");
 
-        // Check capacity
+        // Validity check in DB
         if (user.CVs.Count(x => !x.Deleted) >= maxCVs)
             return BadRequest("It is not possible to add another file to your CV list.");
+        if (user.CVs.Any(x => x.Name == cv.Name))
+            return BadRequest("A file with the same name already exists in your resume list.");
 
 
         using (var stream = new MemoryStream())
@@ -115,17 +119,13 @@ public class CvController : BaseApiController
     [HttpDelete("{CvId}")]
     public async Task<ActionResult> DeleteCv(int CvId)
     {
-        // Check user
-        var user = await GetUser();
-        if (user == null)
-            return NotFound();
-
+        var user = (await GetUserInfo()).Value;
 
         var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
         if (cv is null)
             return BadRequest("CV not exist");
 
-        // delete
+        
         cv.Deleted = true;
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
@@ -136,10 +136,7 @@ public class CvController : BaseApiController
     [HttpGet("Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants()
     {
-        // Check user
-        var user = await GetUser();
-        if (user == null)
-            return Unauthorized();
+        var user = (await GetUserInfo()).Value;
 
         var Applicants = await Context.Applicants.Where(x => x.UserId == user.Id).Take(100).Select(x => new
         {
@@ -152,13 +149,7 @@ public class CvController : BaseApiController
 
         return Ok(Applicants);
     }
-
-
-    public async Task<AppUser> GetUser()
-    {
-        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await Context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName);
-    }
+     
 
     public List<CV> GetAllActualCv(AppUser user)
     {
