@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MyJob.Entities;
 
 namespace MyJob.Controllers;
 
-
+[Authorize]
 [Route("user/cv")]
 public class CvController : BaseApiController
 {
@@ -13,7 +14,7 @@ public class CvController : BaseApiController
 
     const int maxSizeInBytes = 100000;
     const int maxCVs = 5;
-    readonly string[] SupportedFormats = new string[] { /*"doc",*/ "docx" };
+    readonly string[] SupportedFormats = new string[] { "doc", "docx", "pdf" };
     readonly Dictionary<string, string> Types = new()
     {
         {"doc","application/msword" },
@@ -35,23 +36,19 @@ public class CvController : BaseApiController
     {
         var user = (await GetUserInfo()).Value;
 
-        return Ok(GetAllActualCv(user).Select(x => new { x.IsDefault, x.Name, x.DateOfAdded }).ToList());
+        return Ok(GetAllActualCv(user).Select(x => new { x.IsDefault, x.Name,x.Text, x.DateOfAdded }).ToList());
     }
 
     [HttpGet("{CvId}")]
     public async Task<ActionResult> GetCV(int CvId)
     {
         var user = (await GetUserInfo()).Value;
-
         var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
-        return (cv is null) ?
-            BadRequest("CV not exist")
-            :
-            new FileContentResult(cv.FileContent, Types["docx"])
-            // ToDo: Types[user.CVs[CvId].FileContent.FileName.Split(".").Last()])
-            {
-                FileDownloadName = cv.Name
-            };
+
+        if (cv is not null)
+            return new FileContentResult(cv.FileContent, Types[cv.Text]) { FileDownloadName = $"{cv.Name}.{cv.Text}" };
+
+        return BadRequest("CV not exist");
     }
 
     [HttpPut("set-cv-as-default/{CvId}")]
@@ -74,10 +71,10 @@ public class CvController : BaseApiController
 
         if (GetAllActualCv(user).Count > CvId)
         {
-            if (user.CVs.Any(x => x.Name == cv.Name))
+            if (GetAllActualCv(user).Any(x => x.Name == newName))
                 return BadRequest("A file with the same name already exists in your resume list.");
             GetAllActualCv(user)[CvId].Name = newName;
-        }            
+        }
 
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
@@ -92,9 +89,12 @@ public class CvController : BaseApiController
         if (cv.File is null || cv.File.Length < 1)
             return BadRequest("No file was uploaded.");
         if (cv.File.Length > maxSizeInBytes)
-            return BadRequest($"File too large. The file must be up to {maxSizeInBytes/1000} KB.");
-        if (!SupportedFormats.Contains(cv.File.FileName.Split(".").Last()))
-            return BadRequest("The system only accepts files in Word format.");
+            return BadRequest($"File too large. The file must be up to {maxSizeInBytes / 1000} KB.");
+
+        var extension = cv.File.FileName.Split(".").Last();
+        if (!SupportedFormats.Contains(extension))
+            return BadRequest("The system only accepts files in Word / PDF format.");
+
 
         // Validity check in DB
         if (user.CVs.Count(x => !x.Deleted) >= maxCVs)
@@ -110,6 +110,7 @@ public class CvController : BaseApiController
             {
                 Name = cv.Name,
                 FileContent = stream.ToArray(),
+                Text = extension,
                 IsDefault = !user.CVs.Any(x => !x.Deleted)
             });
         }
@@ -125,7 +126,7 @@ public class CvController : BaseApiController
         if (cv is null)
             return BadRequest("CV not exist");
 
-        
+
         cv.Deleted = true;
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
@@ -149,7 +150,7 @@ public class CvController : BaseApiController
 
         return Ok(Applicants);
     }
-     
+
 
     public List<CV> GetAllActualCv(AppUser user)
     {
