@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using MyJob.DTOs;
+using RestSharp.Validation;
 
 namespace MyJob.Controllers;
 
-// [aut]
+
 public class AccountController : BaseApiController
 {
     public DataContext _context { get; }
@@ -18,6 +19,7 @@ public class AccountController : BaseApiController
     }
 
     #region Register & login   
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register2(RegisterDto2 registerDto)
     {
@@ -42,7 +44,7 @@ public class AccountController : BaseApiController
             KnownAs = user.KnownAs
         };
     }
-
+    [AllowAnonymous]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
 
@@ -66,7 +68,7 @@ public class AccountController : BaseApiController
             KnownAs = user.KnownAs
         };
     }
-
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
@@ -150,8 +152,8 @@ public class AccountController : BaseApiController
     [HttpDelete("delete")]
     public async Task<ActionResult> Delete()
     {
-        var user = (await GetUserInfo()).Value;
-
+        var user = (await GetUserInfo())?.Value;
+        
         user.Deleted = true;
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
@@ -168,8 +170,9 @@ public class AccountController : BaseApiController
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
 
+        // add this in ext
         if (user == null)
-            return Unauthorized();
+            return Unauthorized("---");
         return user;
     }
 }

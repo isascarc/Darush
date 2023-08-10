@@ -36,7 +36,7 @@ public class CvController : BaseApiController
     {
         var user = (await GetUserInfo()).Value;
 
-        return Ok(GetAllActualCv(user).Select(x => new { x.IsDefault, x.Name,x.Text, x.DateOfAdded }).ToList());
+        return Ok(GetAllActualCv(user).Select(x => new { x.IsDefault, x.Name, x.Text, x.DateOfAdded }).ToList());
     }
 
     [HttpGet("{CvId}")]
@@ -132,8 +132,6 @@ public class CvController : BaseApiController
     }
 
 
-
-    [Authorize]
     [HttpGet("Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants()
     {
@@ -153,9 +151,8 @@ public class CvController : BaseApiController
 
 
     public List<CV> GetAllActualCv(AppUser user)
-    {
-        return user.CVs.Where(x => !x.Deleted).ToList();
-    }
+        => user.CVs.Where(x => !x.Deleted).ToList();
+
 
     async Task<ActionResult<AppUser>> GetUserInfo()
     {
