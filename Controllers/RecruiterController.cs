@@ -1,8 +1,8 @@
-using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MyJob.Controllers;
 
-// [aut]
+
 public class RecsController : BaseApiController
 {
     public DataContext _context { get; }
@@ -25,18 +25,19 @@ public class RecsController : BaseApiController
 
         var user = _mapper.Map<Recruiter>(registerDto);
 
-        using var hmac = new HMACSHA512();
-        user.RecName = registerDto.RecName.ToLower();
-        user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
-        user.PasswordSalt = hmac.Key;
-
+        using (HMACSHA512 hmac = new())
+        {
+            user.RecName = registerDto.RecName.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+            user.PasswordSalt = hmac.Key;
+        }
         _context.Recruiters.Add(user);
         await _context.SaveChangesAsync();
 
-        var ret = new JsonObject
+        var ret = new UserDto
         {
-            { "UserName", user.RecName},
-            { "Token", _tokenService.CreateTokenForRec(user) }
+            UserName = user.RecName,
+            Token = _tokenService.CreateTokenForRec(user)
         };
         return Ok(ret);
     }
@@ -64,6 +65,7 @@ public class RecsController : BaseApiController
     #endregion
 
 
+    [Authorize]
     [HttpGet("Get-all-recs")]
     public async Task<ActionResult<List<object>>> GetAllRecs()
     {
@@ -82,40 +84,45 @@ public class RecsController : BaseApiController
         }).ToListAsync());
     }
 
-    [HttpGet("Get-rec-Data/{recId}")]
-    public async Task<ActionResult> GetRecData(int recId)
+    [Authorize]
+    [HttpGet("Get-rec-Data")]
+    public async Task<ActionResult> GetRecData()
     {
-        var rec = await _context.Recruiters.FirstOrDefaultAsync(x => x.Id == recId);
+        var rec = (await GetRecInfo()).Value;
 
-        if (rec == null)
-            return NotFound();
         return Ok(rec);
     }
 
-    [HttpPut("Update-rec/{recId}")]
-    public async Task<ActionResult> UpdateRec(int recId, RecUpdateDto recUpdateDto)
+    [Authorize]
+    [HttpPut]
+    public async Task<ActionResult> UpdateRec(RecUpdateDto recUpdateDto)
     {
-        var rec = await _context.Recruiters.FirstOrDefaultAsync(x => x.Id == recId);
-        if (rec == null)
-            return NotFound();
-        
+        var rec = (await GetRecInfo()).Value;
+
         _mapper.Map(recUpdateDto, rec);
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
+        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update rec.");
     }
 
-
-    [HttpDelete("delete/{recId}")]
-    public async Task<ActionResult> Delete(int recId)
+    [Authorize]
+    [HttpDelete]
+    public async Task<ActionResult> Delete()
     {
-        var rec = await _context.Recruiters.FirstOrDefaultAsync(x => (x.Id == recId) && (x.Deleted == false));
+        var rec = (await GetRecInfo()).Value;
 
-        if (rec == null)
-            return NotFound();
         rec.Deleted = true;
-
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
     public async Task<bool> RecExist(string username)
-        => await _context.Recruiters.AnyAsync(x => x.RecName == username.ToLower()); 
+        => await _context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username, StringComparison.OrdinalIgnoreCase));
+
+    public async Task<ActionResult<Recruiter>> GetRecInfo()
+    {
+        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = await _context.Recruiters.FirstOrDefaultAsync(x => x.RecName == usName && !x.Deleted);
+
+        if (user == null)
+            return Unauthorized();
+        return user;
+    }
 }
