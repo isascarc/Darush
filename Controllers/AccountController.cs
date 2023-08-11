@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using MyJob.DTOs;
 using RestSharp.Validation;
+using System.Net.Mail;
+using System.Security.Authentication;
 
 namespace MyJob.Controllers;
 
@@ -97,7 +99,7 @@ public class AccountController : BaseApiController
     [HttpGet("Get-all-users")]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
-        var user = (await GetUserInfo()).Value;
+        var user = (await GetUserInfo());
 
         return Ok(await _context.Users.Where(x => !x.Deleted).Select(x => new
         {
@@ -120,7 +122,7 @@ public class AccountController : BaseApiController
     [HttpGet("Get-User-Data")]
     public async Task<ActionResult> GetUserData()
     {
-        var x = (await GetUserInfo()).Value;
+        var x = (await GetUserInfo());
         return Ok(new
         {
             x.Id,
@@ -142,17 +144,17 @@ public class AccountController : BaseApiController
     [HttpPut("Update-User")]
     public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
     {
-        var user = (await GetUserInfo()).Value;
+        var user = (await GetUserInfo());
 
         _mapper.Map(memberUpdateDto, user);
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
     }
 
     [Authorize]
-    [HttpDelete("delete")]
+    [HttpDelete]
     public async Task<ActionResult> Delete()
     {
-        var user = (await GetUserInfo())?.Value;
+        var user = (await GetUserInfo());
         
         user.Deleted = true;
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
@@ -165,14 +167,11 @@ public class AccountController : BaseApiController
         return await _context.Users.AnyAsync(x => x.UserName == username.ToLower());
     }
 
-    public async Task<ActionResult<AppUser>> GetUserInfo()
+    public async Task<AppUser> GetUserInfo()
     {
-        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
+        var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted);
 
-        // add this in ext
-        if (user == null)
-            return Unauthorized("---");
         return user;
     }
 }
