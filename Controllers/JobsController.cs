@@ -36,16 +36,16 @@ public class JobsController : BaseApiController
     [HttpGet("GetJobById/{JobId}")]
     public async Task<ActionResult<Job>> GetJobById(int JobId)
     {
-        var job = await _context.Jobs.FirstOrDefaultAsync(x => (x.Id == JobId && (x.Deleted == false) && x.Found == false));
+        var job = await _context.Jobs.FirstOrDefaultAsync(x => x.Id == JobId && !x.Deleted && !x.Found);
         return (job is null) ? NotFound() : job;
     }
 
     [HttpGet("GetJobs")]
     public async Task<ActionResult<List<Job>>> GetJobs(bool haveToar, int salary, bool haveEnglish)
     {
-        var salaryCond = _context.Jobs.Where(x => x.salary >= salary && (x.Deleted == false) && x.Found == false);
-        var res1 = (haveToar ? salaryCond : salaryCond.Where(x => x.haveToar == false));
-        var res2 = await (haveEnglish ? res1 : res1.Where(x => x.EnglishNeed == false)).ToListAsync();
+        var salaryCond = _context.Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
+        var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
+        var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
         return (res2.Count == 0) ? NotFound() : res2;
     }
 
@@ -89,15 +89,12 @@ public class JobsController : BaseApiController
     [HttpGet("{JobId}/Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
     {
-        // Check user
         var user = await GetUser();
-        if (user == null)
-            return Unauthorized();
 
         // Todo: Add auth for rec
-        var job = await _context.Jobs.Include(x => x.Applicants).FirstAsync(x => x.Id == JobId);
+        var job = await _context.Jobs.Include(x => x.Applicants).FirstAsync(x => x.Id == JobId && !x.Deleted);
 
-        return Ok(job.Applicants.Where(x => !x.Deleted).Select(x => new
+        return Ok(job.Applicants.Select(x => new
         {
             x.Create,
             x.CvId,
