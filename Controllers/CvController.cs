@@ -69,11 +69,12 @@ public class CvController : BaseApiController
     {
         var user = (await GetUserInfo()).Value;
 
-        if (GetAllActualCv(user).Count > CvId)
+        var allCvs = GetAllActualCv(user);
+        if (allCvs.Count > CvId)
         {
-            if (GetAllActualCv(user).Any(x => x.Name == newName))
+            if (allCvs.Any(x => x.Name == newName))
                 return BadRequest("A file with the same name already exists in your resume list.");
-            GetAllActualCv(user)[CvId].Name = newName;
+            allCvs[CvId].Name = newName;
         }
 
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
