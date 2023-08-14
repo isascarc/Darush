@@ -46,7 +46,7 @@ public class CvController : BaseApiController
         var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
 
         if (cv is not null)
-            return new FileContentResult(cv.FileContent, Types[cv.Text]) { FileDownloadName = $"{cv.Name}.{cv.Text}" };
+            return new FileContentResult(cv.FileContent, Types[cv.Text]) { FileDownloadName = $"{cv.Name}" };
 
         return BadRequest("CV not exist");
     }
@@ -100,7 +100,7 @@ public class CvController : BaseApiController
         // Validity check in DB
         if (user.CVs.Count(x => !x.Deleted) >= maxCVs)
             return BadRequest("It is not possible to add another file to your CV list.");
-        if (user.CVs.Any(x => x.Name == cv.Name))
+        if (user.CVs.Any(x => x.Name == cv.Name && !x.Deleted))
             return BadRequest("A file with the same name already exists in your resume list.");
 
 
