@@ -49,11 +49,11 @@ public class CvController : BaseApiController
         var cv = GetAllActualCv(user).ElementAtOrDefault(0);
         if (cv is not null)
             return new FileContentResult(cv.FileContent, Types[cv.Text]) { FileDownloadName = $"{cv.Name}" };
-        string startPath = @".\start";
-        string zipPath = @".\result.zip";
-        string extractPath = @".\extract";
-
-        ZipFile.CreateFromDirectory(startPath, zipPath);
+        //string startPath = @".\start";
+        //string zipPath = @".\result.zip";
+        //string extractPath = @".\extract";
+        
+        //ZipFile.CreateFromDirectory(startPath, zipPath);
         //ZipFile.ExtractToDirectory(zipPath, extractPath);
         return BadRequest("CV not exist");
     }
