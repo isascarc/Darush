@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyJob.Entities;
+using System.IO.Compression;
 
 namespace MyJob.Controllers;
 
@@ -10,7 +11,7 @@ public class CvController : BaseApiController
 {
     public DataContext Context { get; }
     public ITokenService TokenService { get; }
-    private readonly IMapper _mapper;
+    //private readonly IMapper _mapper;
 
     const int maxSizeInBytes = 100000;
     const int maxCVs = 5;
@@ -26,17 +27,35 @@ public class CvController : BaseApiController
 
     public CvController(DataContext context, ITokenService tokenService, IMapper mapper)
     {
-        _mapper = mapper;
+        //_mapper = mapper;
         Context = context;
         TokenService = tokenService;
     }
 
     [HttpGet("Get-all")]
-    public async Task<ActionResult<List<object>>> GetAllCVs()
+    public async Task<ActionResult<List<object>>> GetAllCVsData()
     {
         var user = (await GetUserInfo()).Value;
 
         return Ok(GetAllActualCv(user).Select(x => new { x.IsDefault, x.Name, x.Text, x.DateOfAdded }).ToList());
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<object>>> GetAllCVs()
+    {
+        var user = (await GetUserInfo()).Value;
+
+        // TODO: Convert all files to ZIP file (with extension);
+        var cv = GetAllActualCv(user).ElementAtOrDefault(0);
+        if (cv is not null)
+            return new FileContentResult(cv.FileContent, Types[cv.Text]) { FileDownloadName = $"{cv.Name}" };
+        string startPath = @".\start";
+        string zipPath = @".\result.zip";
+        string extractPath = @".\extract";
+
+        ZipFile.CreateFromDirectory(startPath, zipPath);
+        //ZipFile.ExtractToDirectory(zipPath, extractPath);
+        return BadRequest("CV not exist");
     }
 
     [HttpGet("{CvId}")]
