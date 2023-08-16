@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyJob.Entities;
 using System.IO.Compression;
 
@@ -22,6 +23,7 @@ public class CvController : BaseApiController
         {"docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
         {"pdf","application/pdf" }
     };
+    const string zipFormat = "application/zip";
 
 
 
@@ -41,21 +43,31 @@ public class CvController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<object>>> GetAllCVs()
+    public async Task<ActionResult> GetAllCVs()
     {
         var user = (await GetUserInfo()).Value;
 
-        // TODO: Convert all files to ZIP file (with extension);
-        var cv = GetAllActualCv(user).ElementAtOrDefault(0);
-        if (cv is not null)
-            return new FileContentResult(cv.FileContent, Types[cv.Text]) { FileDownloadName = $"{cv.Name}" };
-        //string startPath = @".\start";
-        //string zipPath = @".\result.zip";
-        //string extractPath = @".\extract";
-        
-        //ZipFile.CreateFromDirectory(startPath, zipPath);
-        //ZipFile.ExtractToDirectory(zipPath, extractPath);
-        return BadRequest("CV not exist");
+        var allCvs = GetAllActualCv(user);
+
+        if (allCvs.Count > 0)
+        {
+            var zipName = $"TestFiles-{DateTime.Now:yyyy_MM_dd-HH_mm_ss}.zip";
+            using (var ms = new MemoryStream())
+            {  
+                using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
+                {
+                    allCvs.ForEach(file =>
+                    {
+                        var entry = zip.CreateEntry(file.Name);
+                        using var fileStream = new MemoryStream(file.FileContent);
+                        using var entryStream = entry.Open();
+                        fileStream.CopyTo(entryStream);
+                    });
+                }
+                return File(ms.ToArray(), zipFormat, zipName);
+            }
+        }
+        return BadRequest("You don't have a resume yet.");
     }
 
     [HttpGet("{CvId}")]
@@ -65,7 +77,7 @@ public class CvController : BaseApiController
         var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
 
         if (cv is not null)
-            return new FileContentResult(cv.FileContent, Types[cv.Text]) { FileDownloadName = $"{cv.Name}" };
+            return File(cv.FileContent, Types[cv.Text], $"{cv.Name}");
 
         return BadRequest("CV not exist");
     }
