@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyJob.Entities;
 using System.IO.Compression;
 
 namespace MyJob.Controllers;
@@ -27,9 +24,8 @@ public class CvController : BaseApiController
 
 
 
-    public CvController(DataContext context, ITokenService tokenService, IMapper mapper)
+    public CvController(DataContext context, ITokenService tokenService)
     {
-        //_mapper = mapper;
         Context = context;
         TokenService = tokenService;
     }
@@ -46,12 +42,11 @@ public class CvController : BaseApiController
     public async Task<ActionResult> GetAllCVs()
     {
         var user = (await GetUserInfo()).Value;
-
         var allCvs = GetAllActualCv(user);
 
         if (allCvs.Count > 0)
         {
-            var zipName = $"TestFiles-{DateTime.Now:yyyy_MM_dd-HH_mm_ss}.zip";
+            var zipName = $"TestFiles {DateTime.Now:yyyy MM dd-HH mm ss}.zip";
             using (var ms = new MemoryStream())
             {  
                 using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
