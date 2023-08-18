@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
+using System.Drawing;
 using System.IO.Compression;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Text.Json;
+using ClosedXML.Excel;
 
 namespace MyJob.Controllers;
 
@@ -21,6 +25,7 @@ public class CvController : BaseApiController
         {"pdf","application/pdf" }
     };
     const string zipFormat = "application/zip";
+    const string excelFormat = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 
 
@@ -48,7 +53,7 @@ public class CvController : BaseApiController
         {
             var zipName = $"TestFiles {DateTime.Now:yyyy MM dd-HH mm ss}.zip";
             using (var ms = new MemoryStream())
-            {  
+            {
                 using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
                 {
                     allCvs.ForEach(file =>
@@ -74,6 +79,53 @@ public class CvController : BaseApiController
         if (cv is not null)
             return File(cv.FileContent, Types[cv.Text], $"{cv.Name}");
 
+        return BadRequest("CV not exist");
+    }
+
+    [HttpGet("GetAllAsExcel")]
+    public async Task<ActionResult> GetAllAsExcel()
+    {
+        var user = (await GetUserInfo()).Value;
+        var allCvs = GetAllActualCv(user);
+
+        if (allCvs.Count > 0)
+        {
+            using (var workbook = new XLWorkbook())
+            {
+                var ws = workbook.Worksheets.Add("Data from emalon");
+                var listOfArr = new List<object[]>();
+                listOfArr.Add(new string[] { "שם הקובץ", "תאריך העלאה", });
+
+                foreach (var cv in allCvs)
+                {
+                    listOfArr.Add(new object[]
+                    {
+                        cv.Name ,
+                        cv.DateOfAdded
+                    });
+                }
+                ws.Cell(1, 1).InsertData(listOfArr);
+
+                // Table style
+                //ws.Columns("F:I,L:O").Style.Font.FontColor = XLColor.Redwood;
+                ws.Row(1).Style.Font.FontColor = XLColor.CoolBlack;
+                //ws.Columns().AdjustToContents();
+
+                // Add rules to bold the errors:
+                // Pictures column
+                //ws.Column("J").AddConditionalFormat().WhenContains(PicText)
+                //    .Fill.SetBackgroundColor(XLColor.Red);
+                //// Agency column
+                //ws.Range("K1:K" + listOfArr.Count.ToString()).AddConditionalFormat().WhenEquals(0)
+                //    .Fill.SetBackgroundColor(XLColor.Red);
+
+                // Return file
+                var spreadsheetStream = new MemoryStream();
+                workbook.SaveAs(spreadsheetStream);
+                spreadsheetStream.Position = 0;
+                return File(spreadsheetStream, excelFormat, "All my cvs.xlsx");
+            };
+        }
         return BadRequest("CV not exist");
     }
 
