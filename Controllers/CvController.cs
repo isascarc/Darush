@@ -92,7 +92,7 @@ public class CvController : BaseApiController
         {
             using (var workbook = new XLWorkbook())
             {
-                var ws = workbook.Worksheets.Add("Data from emalon");
+                var ws = workbook.Worksheets.Add("Data from My CV");
                 var listOfArr = new List<object[]>();
                 listOfArr.Add(new string[] { "שם הקובץ", "תאריך העלאה", });
 
@@ -100,24 +100,15 @@ public class CvController : BaseApiController
                 {
                     listOfArr.Add(new object[]
                     {
-                        cv.Name ,
+                        cv.Name,
                         cv.DateOfAdded
                     });
                 }
                 ws.Cell(1, 1).InsertData(listOfArr);
 
                 // Table style
-                //ws.Columns("F:I,L:O").Style.Font.FontColor = XLColor.Redwood;
                 ws.Row(1).Style.Font.FontColor = XLColor.CoolBlack;
-                //ws.Columns().AdjustToContents();
-
-                // Add rules to bold the errors:
-                // Pictures column
-                //ws.Column("J").AddConditionalFormat().WhenContains(PicText)
-                //    .Fill.SetBackgroundColor(XLColor.Red);
-                //// Agency column
-                //ws.Range("K1:K" + listOfArr.Count.ToString()).AddConditionalFormat().WhenEquals(0)
-                //    .Fill.SetBackgroundColor(XLColor.Red);
+                ws.Columns().AdjustToContents();
 
                 // Return file
                 var spreadsheetStream = new MemoryStream();
