@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using RestSharp.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyJob.Controllers;
 
@@ -12,13 +15,12 @@ public class JobsController : BaseApiController
     }
 
     [Authorize]
-    [HttpPost("create/{recId}")]
-    public async Task<ActionResult> Create(int recId, JobDto newJob)
+    [HttpPost]
+    public async Task<ActionResult> Create(JobDto newJob)
     {
-        var rec = await _context.Recruiters.Include(x => x.Jobs).FirstOrDefaultAsync(x => x.Id == recId);
-
-        if (rec == null)
-            return NotFound();
+        var rec = (await GetRecInfo()).Value;
+        if (rec is null)
+            return BadRequest();
 
         Job newItem = new()
         {
@@ -107,5 +109,12 @@ public class JobsController : BaseApiController
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
+    }
+
+    public async Task<ActionResult<Recruiter>> GetRecInfo()
+    {
+        var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return await _context.Recruiters.Include(x => x.Jobs)
+            .FirstOrDefaultAsync(x => x.RecName == userName && !x.Deleted);
     }
 }
