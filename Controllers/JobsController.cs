@@ -21,14 +21,15 @@ public class JobsController : BaseApiController
         var rec = (await GetRecInfo()).Value;
         if (rec is null)
             return BadRequest();
-
+         
         Job newItem = new()
         {
             DateOfAdded = DateTime.Now,
             haveToar = newJob.haveToar,
             text = newJob.jobDetails,
             EnglishNeed = newJob.haveEnglish,
-            salary = newJob.salary
+            salary = newJob.salary,
+            Area = newJob.Area,
         };
         rec.Jobs.Add(newItem);
         int affectedRows = _context.SaveChanges();
@@ -105,13 +106,13 @@ public class JobsController : BaseApiController
             x.UserId,
         }));
     }
-    public async Task<AppUser> GetUser()
+    private  async Task<AppUser> GetUser()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
     }
 
-    public async Task<ActionResult<Recruiter>> GetRecInfo()
+    private  async Task<ActionResult<Recruiter>> GetRecInfo()
     {
         var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return await _context.Recruiters.Include(x => x.Jobs)

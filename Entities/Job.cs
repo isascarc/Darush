@@ -9,6 +9,7 @@ public class Job
     public bool haveToar { get; set; }
     public bool EnglishNeed { get; set; }
     public bool Found { get; set; }
+    public int Area { get; set; }
     public DateTime FoundDate { get; set; } = DateTime.UnixEpoch;
     public bool Deleted { get; set; }
 
