@@ -34,7 +34,7 @@ public class RecsController : BaseApiController
         }
         _context.Recruiters.Add(user);
         await _context.SaveChangesAsync();
-
+        var gg = "ddddddddddhsfdhsd";
         var ret = new UserDto
         {
             UserName = user.RecName,
@@ -90,7 +90,6 @@ public class RecsController : BaseApiController
     public async Task<ActionResult> GetRecData()
     {
         var rec = (await GetRecInfo()).Value;
-
         return Ok(rec);
     }
 
@@ -114,10 +113,12 @@ public class RecsController : BaseApiController
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
-    public async Task<bool> RecExist(string username)
+    private async Task<bool> RecExist(string username)
         => await _context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username, StringComparison.OrdinalIgnoreCase));
 
-    public async Task<ActionResult<Recruiter>> GetRecInfo()
+
+    
+    private  async Task<ActionResult<Recruiter>> GetRecInfo()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await _context.Recruiters.FirstOrDefaultAsync(x => x.RecName == usName && !x.Deleted);

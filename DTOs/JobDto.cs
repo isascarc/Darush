@@ -7,6 +7,6 @@ public class JobDto
     public string toppings { get; set; }
     public bool haveToar { get; set; }
     public string jobDetails { get; set; }
-    // public string area { get; set; }
+    public int Area { get; set; }
     // public string other { get; set; }
 }
