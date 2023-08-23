@@ -25,12 +25,13 @@ public class JobsController : BaseApiController
         Job newItem = new()
         {
             DateOfAdded = DateTime.Now,
-            haveToar = newJob.haveToar,
-            text = newJob.jobDetails,
-            EnglishNeed = newJob.haveEnglish,
-            salary = newJob.salary,
+            haveToar = newJob.HaveToar,
+            text = newJob.JobDetails,
+            EnglishNeed = newJob.HaveEnglish,
+            salary = newJob.Salary,
             Area = newJob.Area,
         };
+        
         rec.Jobs.Add(newItem);
         int affectedRows = _context.SaveChanges();
         return Ok(affectedRows > 0);
