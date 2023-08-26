@@ -21,7 +21,7 @@ public class JobsController : BaseApiController
         var rec = (await GetRecInfo()).Value;
         if (rec is null)
             return BadRequest();
-         
+        
         Job newItem = new()
         {
             DateOfAdded = DateTime.Now,

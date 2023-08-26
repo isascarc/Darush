@@ -13,7 +13,6 @@ public class CvController : BaseApiController
 {
     public DataContext Context { get; }
     public ITokenService TokenService { get; }
-    //private readonly IMapper _mapper;
 
     const int maxSizeInBytes = 100000;
     const int maxCVs = 5;
@@ -26,7 +25,6 @@ public class CvController : BaseApiController
     };
     const string zipFormat = "application/zip";
     const string excelFormat = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
 
 
     public CvController(DataContext context, ITokenService tokenService)
