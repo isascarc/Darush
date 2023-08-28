@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.IO.Compression;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.Text.Encodings.Web;
+using System.Web;
 
 namespace MyJob.Controllers;
 
@@ -47,21 +49,19 @@ public class CvController : BaseApiController
 
         if (allCvs.Count > 0)
         {
-            var zipName = $"All cvs {DateTime.Now:yyyy-MM-dd HH-mm-ss}.zip";
-            using (var ms = new MemoryStream())
+            var zipName = $"All cvs {DateTime.Now:yyyy-MM-dd HH.mm.ss}.zip";
+            using var ms = new MemoryStream();
+            using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
             {
-                using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
+                allCvs.ForEach(file =>
                 {
-                    allCvs.ForEach(file =>
-                    {
-                        var entry = zip.CreateEntry(file.Name);
-                        using var fileStream = new MemoryStream(file.FileContent);
-                        using var entryStream = entry.Open();
-                        fileStream.CopyTo(entryStream);
-                    });
-                }
-                return File(ms.ToArray(), zipFormat, zipName);
+                    var entry = zip.CreateEntry(file.Name);
+                    using var fileStream = new MemoryStream(file.FileContent);
+                    using var entryStream = entry.Open();
+                    fileStream.CopyTo(entryStream);
+                });
             }
+            return File(ms.ToArray(), zipFormat, zipName);
         }
         return BadRequest("You don't have a resume yet.");
     }

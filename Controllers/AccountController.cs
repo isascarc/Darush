@@ -1,5 +1,11 @@
+using DocumentFormat.OpenXml.Vml;
 using Microsoft.AspNetCore.Authorization;
+using MimeKit;
+using System.Net.Mail;
+using System;
 
+using MailKit.Net.Smtp;
+using MailKit;
 namespace MyJob.Controllers;
 
 
@@ -151,9 +157,45 @@ public class AccountController : BaseApiController
     public async Task<ActionResult> Delete()
     {
         var user = (await GetUserInfo());
-        
+
         user.Deleted = true;
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+    }
+
+    [Authorize]
+    [HttpGet("send-email")]
+    public async Task<ActionResult> Sendemail()
+    {
+        var user = (await GetUserInfo());
+
+
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("Joey Tribbiani", "isascarch@gmail.com"));
+        message.To.Add(new MailboxAddress("Mrs. Chanandler Bong", "moshelevy1995@gmail.com"));
+        message.Subject = "How you doin'?";
+
+        message.Body = new TextPart("plain")
+        {
+            Text = @"Hey Chandler,
+            I just wanted to let you know that Monica and I were going to go play some paintball, you in?
+            Joey"
+        };
+
+        using (var client = new MailKit.Net.Smtp.SmtpClient())
+        {
+            client.Connect("smtp.gmail.com", 587, false);
+
+            // Note: only needed if the SMTP server requires authentication
+            client.Authenticate("isscr01@gmail.com", Globals.GmailCode);
+
+            client.Send(message);
+            client.Disconnect(true);
+        }
+
+
+
+        return Ok(true);
+        //return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
     }
 
 
@@ -170,4 +212,9 @@ public class AccountController : BaseApiController
 
         return user;
     }
+}
+
+public static class Globals
+{
+    public static string GmailCode { get; set; }
 }

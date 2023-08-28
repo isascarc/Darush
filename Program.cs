@@ -1,10 +1,13 @@
+using MyJob.Controllers;
+
 var builder = WebApplication.CreateBuilder(args);
+
+Globals.GmailCode = builder.Configuration["gmailKey"];
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddApplicationService(builder.Configuration);
 builder.Services.AddIdentityService(builder.Configuration);
-
 
 var app = builder.Build();
 

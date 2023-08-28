@@ -21,7 +21,7 @@ public class JobsController : BaseApiController
         var rec = (await GetRecInfo()).Value;
         if (rec is null)
             return BadRequest();
-        
+
         Job newItem = new()
         {
             DateOfAdded = DateTime.Now,
@@ -31,7 +31,7 @@ public class JobsController : BaseApiController
             salary = newJob.Salary,
             Area = newJob.Area,
         };
-        
+
         rec.Jobs.Add(newItem);
         int affectedRows = _context.SaveChanges();
         return Ok(affectedRows > 0);
@@ -52,6 +52,21 @@ public class JobsController : BaseApiController
         var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
         return (res2.Count == 0) ? NotFound() : res2;
     }
+
+    [HttpGet("get-My-Saved-Jobs")]
+    public async Task<ActionResult<List<Job>>> getMySavedJobs()
+    {
+        var user = (await GetUser());
+
+
+        //_context.Users.Where(x => x.Id == user.Id)
+        //     .Applicants..Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
+        //var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
+        //var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
+        return (1 == 0) ? NotFound() : NotFound();
+    }
+
+
 
     [Authorize]
     [HttpDelete("DeleteJob/{JobId}")]
@@ -107,16 +122,17 @@ public class JobsController : BaseApiController
             x.UserId,
         }));
     }
-    private  async Task<AppUser> GetUser()
+    private async Task<AppUser> GetUser()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
     }
 
-    private  async Task<ActionResult<Recruiter>> GetRecInfo()
+    private async Task<ActionResult<Recruiter>> GetRecInfo()
     {
         var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return await _context.Recruiters.Include(x => x.Jobs)
             .FirstOrDefaultAsync(x => x.RecName == userName && !x.Deleted);
     }
+
 }
