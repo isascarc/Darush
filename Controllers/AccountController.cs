@@ -1,8 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using MyJob.DTOs;
-using RestSharp.Validation;
-using System.Net.Mail;
-using System.Security.Authentication;
 
 namespace MyJob.Controllers;
 

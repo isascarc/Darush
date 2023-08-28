@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
-using System.Drawing;
 using System.IO.Compression;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using System.Text.Json;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace MyJob.Controllers;
 
@@ -49,7 +47,7 @@ public class CvController : BaseApiController
 
         if (allCvs.Count > 0)
         {
-            var zipName = $"TestFiles {DateTime.Now:yyyy MM dd-HH mm ss}.zip";
+            var zipName = $"All cvs {DateTime.Now:yyyy-MM-dd HH-mm-ss}.zip";
             using (var ms = new MemoryStream())
             {
                 using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
