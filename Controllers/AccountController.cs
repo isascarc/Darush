@@ -9,11 +9,9 @@ public class AccountController : BaseApiController
 {
     public DataContext _context { get; }
     public ITokenService _tokenService { get; }
-    private IMapper _mapper;
 
     public AccountController(DataContext context, ITokenService tokenService, IMapper mapper)
     {
-        _mapper = mapper;
         _context = context;
         _tokenService = tokenService;
     }
@@ -50,8 +48,9 @@ public class AccountController : BaseApiController
 
         if (await UserExist(registerDto.username))
             return BadRequest("username is taken");
+        
+        var user = registerDto.Adapt<AppUser>();
 
-        var user = _mapper.Map<AppUser>(registerDto);
         using var hmac = new HMACSHA512();
 
         user.UserName = registerDto.username.ToLower();
