@@ -1,9 +1,7 @@
-using MyJob.Controllers;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Insert the key of Gmail
-Globals.GmailCode = builder.Configuration["gmailKey"];
+MyJob.Globals.GmailCode = builder.Configuration["gmailKey"];
 
 // Add services to the container.
 builder.Services.AddControllers();

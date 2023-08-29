@@ -14,3 +14,10 @@ global using MyJob.Extensions;
 
 //using CloudinaryDotNet;
 //using CloudinaryDotNet.Actions;
+
+
+namespace MyJob;
+public static class Globals
+{
+    public static string GmailCode { get; set; }
+}

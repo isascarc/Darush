@@ -1,12 +1,6 @@
-using DocumentFormat.OpenXml.Vml;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using MimeKit;
-using System.Net.Mail;
-using System;
-
-using MailKit.Net.Smtp;
-using MailKit;
-using Mapster;
 
 namespace MyJob.Controllers;
 
@@ -105,21 +99,22 @@ public class AccountController : BaseApiController
     {
         var user = (await GetUserInfo());
 
-        return Ok(await _context.Users.Where(x => !x.Deleted).Select(x => new
-        {
-            x.Id,
-            x.UserName,
-            x.City,
-            x.Create,
-            x.Phone,
-            x.DateOfBirth,
-            x.Gender,
-            x.LastActive,
-            x.LinkedinLink,
-            x.Mail,
-            x.WebsiteLink,
-            x.Deleted
-        }).ToListAsync());
+        return Ok(await _context.Users.Where(x => !x.Deleted)
+            .Select(x => new
+            {
+                x.Id,
+                x.UserName,
+                x.City,
+                x.Create,
+                x.Phone,
+                x.DateOfBirth,
+                x.Gender,
+                x.LastActive,
+                x.LinkedinLink,
+                x.Mail,
+                x.WebsiteLink,
+                x.Deleted
+            }).ToListAsync());
     }
 
     [Authorize]
@@ -146,7 +141,7 @@ public class AccountController : BaseApiController
 
     [Authorize]
     [HttpPut("Update-User")]
-    public async Task<ActionResult> UpdateUser([FromBody] MemberUpdateDto memberUpdateDto)
+    public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
     {
         var user = (await GetUserInfo());
 
@@ -187,11 +182,7 @@ public class AccountController : BaseApiController
             var a = client.Send(message);
             client.Disconnect(true);
         }
-
-
-
-        return Ok(true);
-        //return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
+        return Ok();
     }
 
 
@@ -208,9 +199,4 @@ public class AccountController : BaseApiController
 
         return user;
     }
-}
-
-public static class Globals
-{
-    public static string GmailCode { get; set; }
 }
