@@ -186,7 +186,7 @@ public class AccountController : BaseApiController
             client.Connect("smtp.gmail.com", 587, false);
 
             // Note: only needed if the SMTP server requires authentication
-            client.Authenticate("isscr01@gmail.com", Globals.GmailCode);
+            client.Authenticate(user.Mail, Globals.GmailCode);
 
             client.Send(message);
             client.Disconnect(true);
