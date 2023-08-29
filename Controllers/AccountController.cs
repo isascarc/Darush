@@ -170,24 +170,19 @@ public class AccountController : BaseApiController
 
 
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("Joey Tribbiani", "isascarch@gmail.com"));
-        message.To.Add(new MailboxAddress("Mrs. Chanandler Bong", "moshelevy1995@gmail.com"));
+        message.From.Add(new MailboxAddress("Darush", "isascarch@gmail.com"));
+        message.To.Add(new MailboxAddress(user.UserName, user.Mail));
         message.Subject = "How you doin'?";
 
         message.Body = new TextPart("plain")
         {
-            Text = @"Hey Chandler,
-            I just wanted to let you know that Monica and I were going to go play some paintball, you in?
-            Joey"
+            Text = "Hey Chandler,I just wanted to let you know that Monica and I were going to go play some paintball, you in?"
         };
 
         using (var client = new MailKit.Net.Smtp.SmtpClient())
         {
             client.Connect("smtp.gmail.com", 587, false);
-
-            // Note: only needed if the SMTP server requires authentication
-            client.Authenticate(user.Mail, Globals.GmailCode);
-
+            client.Authenticate("isscr01@gmail.com", Globals.GmailCode);
             client.Send(message);
             client.Disconnect(true);
         }
