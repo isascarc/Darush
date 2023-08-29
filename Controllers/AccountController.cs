@@ -6,6 +6,8 @@ using System;
 
 using MailKit.Net.Smtp;
 using MailKit;
+using Mapster;
+
 namespace MyJob.Controllers;
 
 
@@ -144,11 +146,11 @@ public class AccountController : BaseApiController
 
     [Authorize]
     [HttpPut("Update-User")]
-    public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
+    public async Task<ActionResult> UpdateUser([FromBody] MemberUpdateDto memberUpdateDto)
     {
         var user = (await GetUserInfo());
 
-        _mapper.Map(memberUpdateDto, user);
+        memberUpdateDto.Adapt(user);
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
     }
 
@@ -168,7 +170,6 @@ public class AccountController : BaseApiController
     {
         var user = (await GetUserInfo());
 
-
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("Darush", "isascarch@gmail.com"));
         message.To.Add(new MailboxAddress(user.UserName, user.Mail));
@@ -183,7 +184,7 @@ public class AccountController : BaseApiController
         {
             client.Connect("smtp.gmail.com", 587, false);
             client.Authenticate("isscr01@gmail.com", Globals.GmailCode);
-            client.Send(message);
+            var a = client.Send(message);
             client.Disconnect(true);
         }
 

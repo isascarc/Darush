@@ -1,3 +1,5 @@
+using DocumentFormat.OpenXml.Spreadsheet;
+
 namespace MyJob.Helpers;
 
 public class AutoMapperProfiles : Profile
@@ -9,9 +11,14 @@ public class AutoMapperProfiles : Profile
             //.ForMember(dest => dest.Age, opt => opt.MapFrom(src => src.DateOfBirth.CalculateAge()))
             ;
         CreateMap<Photo, PhotoDto>();
+
+        CreateMap<MemberDto, AppUser>();
         CreateMap<RecUpdateDto, AppUser>();
         CreateMap<RegisterDto, AppUser>();
+
         CreateMap<RegisterRecDto, Recruiter>();
         CreateMap<RecUpdateDto, Recruiter>();
+
+
     }
 }

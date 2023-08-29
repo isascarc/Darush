@@ -6,9 +6,9 @@ public class MemberUpdateDto
     // update pass
     
     public string Mail { get; set; }
-    public string City { get; set; }
+   // public string City { get; set; }
     public string Phone { get; set; }
-    public string LinkedinLink { get; set; }
-    public string WebsiteLink { get; set; }
+    //public string LinkedinLink { get; set; }
+    //public string WebsiteLink { get; set; }
     //todo:  public DateOnly DateOfBirth { get; set; }
 }
