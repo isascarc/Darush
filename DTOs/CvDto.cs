@@ -1,6 +1,6 @@
 namespace MyJob.DTOs;
 public class CvDto
 {
-    public string Name { get; set; }
-    public IFormFile File { get; set; }
+    [Required][StringLength(50, MinimumLength = 1)] public string Name { get; set; }
+    [Required] public IFormFile File { get; set; }
 }
