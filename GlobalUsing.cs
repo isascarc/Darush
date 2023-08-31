@@ -6,6 +6,9 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
 global using AutoMapper;
 
+global using System.ComponentModel.DataAnnotations;
+
+
 global using MyJob.Data;
 global using MyJob.DTOs;
 global using MyJob.Interfaces;

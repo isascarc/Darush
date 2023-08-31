@@ -5,7 +5,7 @@ namespace MyJob.Entities;
 public class AppUser
 {
     [Required] public int Id { get; set; }
-    [Required] public string UserName { get; set; }
+    [StringLength(8, MinimumLength = 4)][Required] public string UserName { get; set; }
     [Required] public byte[] PasswordHash { get; set; }
     [Required] public byte[] PasswordSalt { get; set; }
     public DateOnly DateOfBirth { get; set; }
