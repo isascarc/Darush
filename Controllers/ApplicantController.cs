@@ -38,7 +38,7 @@ public class ApplicantsController : BaseApiController
                     CvId = user.CVs.Where(x => x.IsDefault).First().Id,
                     UserId = user.Id
                 }
-                );
+            );
 
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to Applicant user.");
     }

@@ -34,7 +34,6 @@ public class RecsController : BaseApiController
         }
         _context.Recruiters.Add(user);
         await _context.SaveChangesAsync();
-        var gg = "ddddddddddhsfdhsd";
         var ret = new UserDto
         {
             UserName = user.RecName,

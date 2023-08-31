@@ -47,7 +47,7 @@ public class AccountController : BaseApiController
     {
         if (await UserExist(registerDto.username))
             return BadRequest("username is taken");
-        
+
         var user = registerDto.Adapt<AppUser>();
 
         using var hmac = new HMACSHA512();
@@ -142,11 +142,17 @@ public class AccountController : BaseApiController
     public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
     {
         var user = (await GetUserInfo());
+        var isChangeName = memberUpdateDto.UserName == user.UserName;
 
         memberUpdateDto.Adapt(user);
-        
-        // TODO: send new token if userName changed
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
+
+        // Send new token if userName changed
+        return (await _context.SaveChangesAsync()) > 0 ?
+            (isChangeName ?
+                Ok(new UserDto { UserName = user.UserName, Token = _tokenService.CreateToken(user), KnownAs = user.KnownAs })
+                :
+                NoContent())
+            : BadRequest("failed to update user.");
     }
 
     [Authorize]
@@ -169,6 +175,7 @@ public class AccountController : BaseApiController
         message.From.Add(new MailboxAddress("Darush", "isascarch@gmail.com"));
         message.To.Add(new MailboxAddress(user.UserName, user.Mail));
         message.Subject = "How you doin'?";
+
 
         message.Body = new TextPart("plain")
         {
