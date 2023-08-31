@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
+
 namespace MyJob.Controllers;
 
-// [aut]
+[Authorize]
 public class ApplicantsController : BaseApiController
 {
     public DataContext _context { get; }

@@ -145,7 +145,7 @@ public class AccountController : BaseApiController
         var user = (await GetUserInfo());
 
         memberUpdateDto.Adapt(user);
-
+        
         // TODO: send new token if userName changed
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update user.");
     }
