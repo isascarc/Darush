@@ -7,8 +7,10 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
 
 
-// 3rd party directives
+// 3rd party directives:
+// ---------------------
 global using AutoMapper;
+
 //using CloudinaryDotNet;
 //using CloudinaryDotNet.Actions;
 
@@ -20,9 +22,7 @@ global using MyJob.Interfaces;
 global using MyJob.Entities;
 global using MyJob.Extensions;
 
-
-
-namespace MyJob;
+namespace MyJob.Helpers;
 public static class Globals
 {
     public static string GmailCode { get; set; }
