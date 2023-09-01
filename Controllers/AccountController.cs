@@ -11,7 +11,7 @@ public class AccountController : BaseApiController
     public DataContext _context { get; }
     public ITokenService _tokenService { get; }
 
-    public AccountController(DataContext context, ITokenService tokenService, IMapper mapper)
+    public AccountController(DataContext context, ITokenService tokenService/*, IMapper mapper*/)
     {
         _context = context;
         _tokenService = tokenService;

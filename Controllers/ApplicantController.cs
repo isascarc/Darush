@@ -7,11 +7,9 @@ public class ApplicantsController : BaseApiController
 {
     public DataContext _context { get; }
     public ITokenService _tokenService { get; }
-    private readonly IMapper _mapper;
 
-    public ApplicantsController(DataContext context, ITokenService tokenService, IMapper mapper)
+    public ApplicantsController(DataContext context, ITokenService tokenService)
     {
-        _mapper = mapper;
         _context = context;
         _tokenService = tokenService;
     }

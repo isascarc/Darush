@@ -9,7 +9,7 @@ global using Microsoft.AspNetCore.Mvc;
 
 // 3rd party directives:
 // ---------------------
-global using AutoMapper;
+//global using AutoMapper;
 
 //using CloudinaryDotNet;
 //using CloudinaryDotNet.Actions;

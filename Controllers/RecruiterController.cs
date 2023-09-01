@@ -8,11 +8,11 @@ public class RecsController : BaseApiController
 {
     public DataContext _context { get; }
     public ITokenService _tokenService { get; }
-    private readonly IMapper _mapper;
+    //private readonly IMapper _mapper;
 
-    public RecsController(DataContext context, ITokenService tokenService, IMapper mapper)
+    public RecsController(DataContext context, ITokenService tokenService /*IMapper mapper*/)
     {
-        _mapper = mapper;
+        //_mapper = mapper;
         _context = context;
         _tokenService = tokenService;
     }
@@ -24,7 +24,7 @@ public class RecsController : BaseApiController
         if (await RecExist(registerDto.RecName))
             return BadRequest("username is taken");
 
-        var user = _mapper.Map<Recruiter>(registerDto);
+        Recruiter user = new();// TODO: _mapper.Map<Recruiter>(registerDto);
 
         using (HMACSHA512 hmac = new())
         {
@@ -98,7 +98,7 @@ public class RecsController : BaseApiController
     {
         var rec = (await GetRecInfo()).Value;
 
-        _mapper.Map(recUpdateDto, rec);
+        // TODO: _mapper.Map(recUpdateDto, rec);
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update rec.");
     }
 
