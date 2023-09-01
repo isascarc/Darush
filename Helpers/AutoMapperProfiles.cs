@@ -1,5 +1,3 @@
-using DocumentFormat.OpenXml.Spreadsheet;
-
 namespace MyJob.Helpers;
 
 public class AutoMapperProfiles : Profile

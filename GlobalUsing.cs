@@ -21,6 +21,7 @@ global using MyJob.Entities;
 global using MyJob.Extensions;
 
 
+
 namespace MyJob;
 public static class Globals
 {
