@@ -1,4 +1,5 @@
 using DocumentFormat.OpenXml.EMMA;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 
 namespace MyJob.Controllers;
@@ -97,8 +98,7 @@ public class RecsController : BaseApiController
     public async Task<ActionResult> UpdateRec(RecUpdateDto recUpdateDto)
     {
         var rec = (await GetRecInfo()).Value;
-
-        // TODO: _mapper.Map(recUpdateDto, rec);
+        recUpdateDto.Adapt(rec);
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update rec.");
     }
 
