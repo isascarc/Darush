@@ -9,11 +9,9 @@ public class RecsController : BaseApiController
 {
     public DataContext _context { get; }
     public ITokenService _tokenService { get; }
-    //private readonly IMapper _mapper;
 
     public RecsController(DataContext context, ITokenService tokenService /*IMapper mapper*/)
     {
-        //_mapper = mapper;
         _context = context;
         _tokenService = tokenService;
     }
