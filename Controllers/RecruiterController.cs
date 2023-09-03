@@ -21,7 +21,8 @@ public class RecsController : BaseApiController
         if (await RecExist(registerDto.RecName))
             return BadRequest("username is taken");
 
-        Recruiter user = new();// TODO: _mapper.Map<Recruiter>(registerDto);
+        Recruiter user = new();
+        // TODO: _mapper.Map<Recruiter>(registerDto);
 
         using (HMACSHA512 hmac = new())
         {
