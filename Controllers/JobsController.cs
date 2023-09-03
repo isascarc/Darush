@@ -1,7 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
-using RestSharp.Validation;
-using System.ComponentModel.DataAnnotations;
 
 namespace MyJob.Controllers;
 

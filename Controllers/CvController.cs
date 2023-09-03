@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using System.IO.Compression;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System.Text.Encodings.Web;
-using System.Web;
 
 namespace MyJob.Controllers;
 

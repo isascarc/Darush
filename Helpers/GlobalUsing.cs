@@ -9,6 +9,7 @@ global using Microsoft.AspNetCore.Mvc;
 
 // 3rd party directives:
 // ---------------------
+global using Mapster;
 //global using AutoMapper;
 
 //using CloudinaryDotNet;

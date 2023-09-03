@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MyJob.Entities;
 
 public class AppUser
