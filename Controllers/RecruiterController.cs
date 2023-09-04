@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-
 namespace MyJob.Controllers;
 
 
@@ -59,7 +57,6 @@ public class RecsController : BaseApiController
             Token = _tokenService.CreateTokenForRec(user)
         };
     }
-
     #endregion
 
 
