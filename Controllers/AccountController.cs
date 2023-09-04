@@ -1,16 +1,15 @@
-using Microsoft.AspNetCore.Authorization;
 using MimeKit;
 using MyJob.Helpers;
 
 namespace MyJob.Controllers;
 
-
+[Authorize]
 public class AccountController : BaseApiController
 {
     public DataContext _context { get; }
     public ITokenService _tokenService { get; }
 
-    public AccountController(DataContext context, ITokenService tokenService/*, IMapper mapper*/)
+    public AccountController(DataContext context, ITokenService tokenService)
     {
         _context = context;
         _tokenService = tokenService;
@@ -91,28 +90,11 @@ public class AccountController : BaseApiController
 
     #endregion
 
-    [Authorize]
     [HttpGet("Get-all-users")]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
         var user = (await GetUserInfo());
-
-        return Ok(await _context.Users.Where(x => !x.Deleted)
-            .Select(x => new
-            {
-                x.Id,
-                x.UserName,
-                x.City,
-                x.Create,
-                x.Phone,
-                x.DateOfBirth,
-                x.Gender,
-                x.LastActive,
-                x.LinkedinLink,
-                x.Mail,
-                x.WebsiteLink,
-                x.Deleted
-            }).ToListAsync());
+        return Ok(await _context.Users.Where(x => !x.Deleted).ToListAsync());
     }
 
     [Authorize]
@@ -120,21 +102,8 @@ public class AccountController : BaseApiController
     public async Task<ActionResult> GetUserData()
     {
         var x = (await GetUserInfo());
-        return Ok(new
-        {
-            x.Id,
-            x.UserName,
-            x.City,
-            x.Create,
-            x.Phone,
-            x.DateOfBirth,
-            x.Gender,
-            x.LastActive,
-            x.LinkedinLink,
-            x.Mail,
-            x.WebsiteLink,
-            x.Deleted
-        });
+        x.CVs = new();
+        return Ok(x);
     }
 
     [Authorize]
