@@ -8,7 +8,7 @@ public class RecsController : BaseApiController
     public DataContext _context { get; }
     public ITokenService _tokenService { get; }
 
-    public RecsController(DataContext context, ITokenService tokenService /*IMapper mapper*/)
+    public RecsController(DataContext context, ITokenService tokenService)
     {
         _context = context;
         _tokenService = tokenService;
@@ -22,7 +22,7 @@ public class RecsController : BaseApiController
             return BadRequest("username is taken");
 
         Recruiter user = new();
-        // TODO: _mapper.Map<Recruiter>(registerDto);
+        registerDto.Adapt(user);
 
         using (HMACSHA512 hmac = new())
         {
@@ -110,7 +110,7 @@ public class RecsController : BaseApiController
     }
 
     private async Task<bool> RecExist(string username)
-        => await _context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username, StringComparison.OrdinalIgnoreCase));
+        => await _context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username.ToLower()));
 
 
     
