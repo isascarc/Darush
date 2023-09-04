@@ -1,6 +1,5 @@
 namespace MyJob.Controllers;
 
-
 public class RecsController : BaseApiController
 {
     public DataContext _context { get; }
