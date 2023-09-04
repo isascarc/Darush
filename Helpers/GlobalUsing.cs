@@ -5,6 +5,7 @@ global using System.ComponentModel.DataAnnotations;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Authorization;
 
 
 // 3rd party directives:
@@ -22,9 +23,3 @@ global using MyJob.DTOs;
 global using MyJob.Interfaces;
 global using MyJob.Entities;
 global using MyJob.Extensions;
-
-namespace MyJob.Helpers;
-public static class Globals
-{
-    public static string GmailCode { get; set; }
-}
