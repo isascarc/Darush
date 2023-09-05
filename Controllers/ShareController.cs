@@ -6,21 +6,21 @@ namespace MyJob.Controllers;
 [Authorize]
 public class ShareController : BaseApiController
 {
-    public DataContext _context { get; }
-    public ITokenService _tokenService { get; }
+    private DataContext Context { get; }
+    private ITokenService TokenService { get; }
     const string ourEmailAddress = "isscr01@gmail.com";
 
     public ShareController(DataContext context, ITokenService tokenService)
     {
-        _context = context;
-        _tokenService = tokenService;
+        Context = context;
+        TokenService = tokenService;
     }
 
     [HttpPost("Send-to-email")]
     public async Task<ActionResult<UserDto>> Create(SendMailDto emailDetails)
     {
         var user = (await GetUser());
-        var job = _context.Jobs.First(x => x.Id == emailDetails.jobNumber);
+        var job = Context.Jobs.First(x => x.Id == emailDetails.jobNumber);
 
 
         var message = new MimeMessage();
@@ -47,6 +47,6 @@ public class ShareController : BaseApiController
     public async Task<AppUser> GetUser()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
+        return await Context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
     }
 }
