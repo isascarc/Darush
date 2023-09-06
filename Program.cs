@@ -1,5 +1,3 @@
-using MyJob.Helpers;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Insert the key of Gmail

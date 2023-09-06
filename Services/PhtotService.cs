@@ -1,4 +1,3 @@
-using MyJob.Helpers;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;

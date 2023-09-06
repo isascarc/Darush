@@ -1,5 +1,3 @@
-using MyJob.Helpers;
-
 namespace MyJob.Interfaces;
 public interface IUserRepository
     {

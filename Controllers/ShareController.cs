@@ -1,5 +1,4 @@
 using MimeKit;
-using MyJob.Helpers;
 
 namespace MyJob.Controllers;
 
