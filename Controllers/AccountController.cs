@@ -13,7 +13,6 @@ public class AccountController : BaseApiController
         _context = context;
         _tokenService = tokenService;
     }
-
     #region Register & login   
     [AllowAnonymous]
     [HttpPost("register")]
