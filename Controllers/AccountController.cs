@@ -59,7 +59,7 @@ public class AccountController : BaseApiController
         return new UserDto
         {
             UserName = user.UserName,
-            Token = _tokenService.CreateToken(user),
+            Token = _tokenService.CreateToken(user.UserName),
             KnownAs = user.KnownAs
         };
     }
@@ -81,7 +81,7 @@ public class AccountController : BaseApiController
         return new UserDto
         {
             UserName = user.UserName,
-            Token = _tokenService.CreateToken(user),
+            Token = _tokenService.CreateToken(user.UserName),
             KnownAs = user.KnownAs
         };
     }
@@ -116,7 +116,7 @@ public class AccountController : BaseApiController
         // Send new token if userName changed
         return (await _context.SaveChangesAsync()) > 0 ?
             (isChangeName ?
-                Ok(new UserDto { UserName = user.UserName, Token = _tokenService.CreateToken(user), KnownAs = user.KnownAs })
+                Ok(new UserDto { UserName = user.UserName, Token = _tokenService.CreateToken(user.UserName), KnownAs = user.KnownAs })
                 :
                 NoContent())
             : BadRequest("failed to update user.");

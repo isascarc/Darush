@@ -32,7 +32,7 @@ public class RecsController : BaseApiController
         var ret = new UserDto
         {
             UserName = user.RecName,
-            Token = _tokenService.CreateTokenForRec(user)
+            Token = _tokenService.CreateToken(user.RecName)
         };
         return Ok(ret);
     }
@@ -53,7 +53,7 @@ public class RecsController : BaseApiController
         return new UserDto
         {
             UserName = user.RecName,
-            Token = _tokenService.CreateTokenForRec(user)
+            Token = _tokenService.CreateToken(user.RecName)
         };
     }
     #endregion
