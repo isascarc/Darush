@@ -2,13 +2,13 @@ namespace MyJob.Controllers;
 
 public class RecsController : BaseApiController
 {
-    public DataContext _context { get; }
-    public ITokenService _tokenService { get; }
+    public DataContext Context { get; }
+    public ITokenService TokenService { get; }
 
     public RecsController(DataContext context, ITokenService tokenService)
     {
-        _context = context;
-        _tokenService = tokenService;
+        Context = context;
+        TokenService = tokenService;
     }
 
     #region Register & login   
@@ -27,12 +27,12 @@ public class RecsController : BaseApiController
             user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
             user.PasswordSalt = hmac.Key;
         }
-        _context.Recruiters.Add(user);
-        await _context.SaveChangesAsync();
+        Context.Recruiters.Add(user);
+        await Context.SaveChangesAsync();
         var ret = new UserDto
         {
             UserName = user.RecName,
-            Token = _tokenService.CreateToken(user.RecName)
+            Token = TokenService.CreateToken(user.RecName)
         };
         return Ok(ret);
     }
@@ -40,7 +40,7 @@ public class RecsController : BaseApiController
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await _context.Recruiters.
+        var user = await Context.Recruiters.
             FirstOrDefaultAsync(x => x.RecName == loginDto.UserName);
         if (user == null)
             return Unauthorized();
@@ -53,7 +53,7 @@ public class RecsController : BaseApiController
         return new UserDto
         {
             UserName = user.RecName,
-            Token = _tokenService.CreateToken(user.RecName)
+            Token = TokenService.CreateToken(user.RecName)
         };
     }
     #endregion
@@ -63,7 +63,7 @@ public class RecsController : BaseApiController
     [HttpGet("Get-all-recs")]
     public async Task<ActionResult<List<object>>> GetAllRecs()
     {
-        return Ok(await _context.Recruiters.Where(x => !x.Deleted).Select(x => new
+        return Ok(await Context.Recruiters.Where(x => !x.Deleted).Select(x => new
         {
             x.Id,
             x.RecName,
@@ -92,7 +92,7 @@ public class RecsController : BaseApiController
     {
         var rec = (await GetRecInfo()).Value;
         recUpdateDto.Adapt(rec);
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update rec.");
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update rec.");
     }
 
     [Authorize]
@@ -102,18 +102,18 @@ public class RecsController : BaseApiController
         var rec = (await GetRecInfo()).Value;
 
         rec.Deleted = true;
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
     private async Task<bool> RecExist(string username)
-        => await _context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username.ToLower()));
+        => await Context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username.ToLower()));
 
 
     
     private  async Task<ActionResult<Recruiter>> GetRecInfo()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = await _context.Recruiters.FirstOrDefaultAsync(x => x.RecName == usName && !x.Deleted);
+        var user = await Context.Recruiters.FirstOrDefaultAsync(x => x.RecName == usName && !x.Deleted);
 
         if (user == null)
             return Unauthorized();
