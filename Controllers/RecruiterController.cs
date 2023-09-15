@@ -1,5 +1,6 @@
 namespace MyJob.Controllers;
 
+[Authorize]
 public class RecsController : BaseApiController
 {
     public DataContext Context { get; }
@@ -11,7 +12,8 @@ public class RecsController : BaseApiController
         TokenService = tokenService;
     }
 
-    #region Register & login   
+    #region Register & login  
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult> Register(RegisterRecDto registerDto)
     {
@@ -37,6 +39,7 @@ public class RecsController : BaseApiController
         return Ok(ret);
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
@@ -59,7 +62,7 @@ public class RecsController : BaseApiController
     #endregion
 
 
-    [Authorize]
+
     [HttpGet("Get-all-recs")]
     public async Task<ActionResult<List<object>>> GetAllRecs()
     {
@@ -78,7 +81,6 @@ public class RecsController : BaseApiController
         }).ToListAsync());
     }
 
-    [Authorize]
     [HttpGet("Get-rec-Data")]
     public async Task<ActionResult> GetRecData()
     {
@@ -86,7 +88,6 @@ public class RecsController : BaseApiController
         return Ok(rec);
     }
 
-    [Authorize]
     [HttpPut]
     public async Task<ActionResult> UpdateRec(RecUpdateDto recUpdateDto)
     {
@@ -95,7 +96,6 @@ public class RecsController : BaseApiController
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update rec.");
     }
 
-    [Authorize]
     [HttpDelete]
     public async Task<ActionResult> Delete()
     {
@@ -107,8 +107,6 @@ public class RecsController : BaseApiController
 
     private async Task<bool> RecExist(string username)
         => await Context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username.ToLower()));
-
-
     
     private  async Task<ActionResult<Recruiter>> GetRecInfo()
     {

@@ -13,6 +13,7 @@ public class AccountController : BaseApiController
         _context = context;
         _tokenService = tokenService;
     }
+
     #region Register & login   
     [AllowAnonymous]
     [HttpPost("register")]
@@ -95,7 +96,6 @@ public class AccountController : BaseApiController
         return Ok(await _context.Users.Where(x => !x.Deleted).ToListAsync());
     }
 
-    [Authorize]
     [HttpGet("Get-User-Data")]
     public async Task<ActionResult> GetUserData()
     {
@@ -104,7 +104,6 @@ public class AccountController : BaseApiController
         return Ok(x);
     }
 
-    [Authorize]
     [HttpPut("Update-User")]
     public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
     {
@@ -122,7 +121,6 @@ public class AccountController : BaseApiController
             : BadRequest("failed to update user.");
     }
 
-    [Authorize]
     [HttpDelete]
     public async Task<ActionResult> Delete()
     {
@@ -132,7 +130,6 @@ public class AccountController : BaseApiController
         return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
-    [Authorize]
     [HttpGet("send-email")]
     public async Task<ActionResult> Sendemail()
     {
@@ -158,8 +155,6 @@ public class AccountController : BaseApiController
         }
         return Ok();
     }
-
-
 
     public async Task<bool> UserExist(string username)
     {
