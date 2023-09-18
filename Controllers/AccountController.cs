@@ -14,12 +14,22 @@ public class AccountController : BaseApiController
         _tokenService = tokenService;
     }
 
-    #region Register & login   
+    #region Register & login
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register2(RegisterDto2 registerDto)
     {
         return await Register(new RegisterDto() { username = registerDto.username, password = registerDto.password });
+
+        /*
+        התקבלתי
+
+        מה שואלים?
+        כמה זמן?
+
+
+
+         */
         //if (await UserExist(registerDto.username))
         //    return BadRequest("username is taken");
 
