@@ -14,6 +14,13 @@ public class AccountController : BaseApiController
         _tokenService = tokenService;
     }
 
+    [Authorize(Roles = "user")]
+    [HttpPost("reg")]
+    public async Task<ActionResult> Index()
+    {
+        return Ok();
+    }
+
     #region Register & login
     [AllowAnonymous]
     [HttpPost("register")]
@@ -60,7 +67,7 @@ public class AccountController : BaseApiController
         return new UserDto
         {
             UserName = user.UserName,
-            Token = _tokenService.CreateToken(user.UserName),
+            Token = _tokenService.CreateToken(user.UserName,   "user"),
             KnownAs = user.KnownAs
         };
     }
@@ -82,7 +89,7 @@ public class AccountController : BaseApiController
         return new UserDto
         {
             UserName = user.UserName,
-            Token = _tokenService.CreateToken(user.UserName),
+            Token = _tokenService.CreateToken(user.UserName, "user"),
             KnownAs = user.KnownAs
         };
     }
@@ -115,7 +122,7 @@ public class AccountController : BaseApiController
         // Send new token if userName changed
         return (await _context.SaveChangesAsync()) > 0 ?
             (isChangeName ?
-                Ok(new UserDto { UserName = user.UserName, Token = _tokenService.CreateToken(user.UserName), KnownAs = user.KnownAs })
+                Ok(new UserDto { UserName = user.UserName, Token = _tokenService.CreateToken(user.UserName, "user"), KnownAs = user.KnownAs })
                 :
                 NoContent())
             : BadRequest("failed to update user.");

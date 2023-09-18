@@ -11,11 +11,12 @@ namespace MyJob.Services
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
         }
 
-        public string CreateToken(string UserName)
+        public string CreateToken(string UserName, string roleName)
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.NameId, UserName)
+                new Claim(JwtRegisteredClaimNames.NameId, UserName),
+                new Claim(ClaimTypes.Role,roleName),
             };
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -26,6 +27,7 @@ namespace MyJob.Services
             };
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
+
             return tokenHandler.WriteToken(token);
         }
     }
