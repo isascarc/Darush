@@ -1,6 +1,6 @@
 namespace MyJob.Controllers;
 
-[Authorize]
+[Authorize(Roles = "recruiter")]
 public class RecsController : BaseApiController
 {
     public DataContext Context { get; }
@@ -56,7 +56,7 @@ public class RecsController : BaseApiController
         return new UserDto
         {
             UserName = user.RecName,
-            Token = TokenService.CreateToken(user.RecName, "user")
+            Token = TokenService.CreateToken(user.RecName, "recruiter")
         };
     }
     #endregion
