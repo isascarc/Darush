@@ -2,7 +2,7 @@ using MimeKit;
 
 namespace MyJob.Controllers;
 
-[Authorize]
+[Authorize(Roles = "user")]
 public class AccountController : BaseApiController
 {
     public DataContext _context { get; }
@@ -14,12 +14,6 @@ public class AccountController : BaseApiController
         _tokenService = tokenService;
     }
 
-    [Authorize(Roles = "user")]
-    [HttpPost("reg")]
-    public async Task<ActionResult> Index()
-    {
-        return Ok();
-    }
 
     #region Register & login
     [AllowAnonymous]
@@ -99,15 +93,14 @@ public class AccountController : BaseApiController
     [HttpGet("Get-all-users")]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
-        var user = (await GetUserInfo());
+        var user = await GetUserInfo(false);
         return Ok(await _context.Users.Where(x => !x.Deleted).ToListAsync());
     }
 
     [HttpGet("Get-User-Data")]
     public async Task<ActionResult> GetUserData()
     {
-        var x = (await GetUserInfo());
-        x.CVs = new();
+        var x = await GetUserInfo(false);
         return Ok(x);
     }
 
@@ -168,10 +161,13 @@ public class AccountController : BaseApiController
         return await _context.Users.AnyAsync(x => x.UserName == username.ToLower());
     }
 
-    public async Task<AppUser> GetUserInfo()
+    public async Task<AppUser> GetUserInfo(bool withCvs = true)
     {
         var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted);
+        var user = withCvs ?
+            await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted)
+            :
+            await _context.Users.FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted);
 
         return user;
     }
