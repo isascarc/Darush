@@ -34,7 +34,7 @@ public class RecsController : BaseApiController
         var ret = new UserDto
         {
             UserName = user.RecName,
-            Token = TokenService.CreateToken(user.RecName, "user")
+            Token = TokenService.CreateToken(user.RecName, "recruiter")
         };
         return Ok(ret);
     }

@@ -1,6 +1,6 @@
 namespace MyJob.Controllers;
 
-[Authorize]
+[Authorize(Roles = "user")]
 public class ApplicantsController : BaseApiController
 {
     public DataContext _context { get; }

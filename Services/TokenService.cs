@@ -17,6 +17,7 @@ namespace MyJob.Services
             {
                 new Claim(JwtRegisteredClaimNames.NameId, UserName),
                 new Claim(ClaimTypes.Role,roleName),
+                //new Claim(ClaimTypes.Role,"user")
             };
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
             var tokenDescriptor = new SecurityTokenDescriptor
