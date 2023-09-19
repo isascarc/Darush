@@ -1,7 +1,60 @@
 namespace MyJob.Controllers;
 
 
-public class JobsController : BaseApiController
+// This class exist for users authorize
+[Authorize(Roles = "user")]
+[ApiController]
+[Route("jobs")]
+public class JobsControllerForUser : ControllerBase
+{
+     public DataContext _context { get; }
+    public JobsControllerForUser(DataContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet("get-My-Saved-Jobs")]
+    public async Task<ActionResult<List<Job>>> getMySavedJobs()
+    {
+        var user = (await GetUser());
+
+
+        //_context.Users.Where(x => x.Id == user.Id)
+        //     .Applicants..Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
+        //var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
+        //var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
+        return (1 == 0) ? NotFound() : NotFound();
+    }
+
+    [HttpGet("{JobId}/Applicants")]
+    public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
+    {
+        var user = await GetUser();
+
+        // Todo: Add auth for rec
+        var job = await _context.Jobs.Include(x => x.Applicants).FirstAsync(x => x.Id == JobId && !x.Deleted);
+
+        return Ok(job.Applicants.Select(x => new
+        {
+            x.Create,
+            x.CvId,
+            x.Id,
+            x.LinkedinLink,
+            x.UserId,
+        }));
+    }
+
+    private async Task<AppUser> GetUser()
+    {
+        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
+    }
+}
+
+
+
+[Authorize(Roles = "recruiter")]
+public partial class JobsController : BaseApiController
 {
     public DataContext _context { get; }
     public JobsController(DataContext context)
@@ -9,7 +62,7 @@ public class JobsController : BaseApiController
         _context = context;
     }
 
-    [Authorize]
+
     [HttpPost]
     public async Task<ActionResult> Create(JobDto newJob)
     {
@@ -32,6 +85,7 @@ public class JobsController : BaseApiController
         return Ok(affectedRows > 0);
     }
 
+    [AllowAnonymous]
     [HttpGet("GetJobById/{JobId}")]
     public async Task<ActionResult<Job>> GetJobById(int JobId)
     {
@@ -39,6 +93,7 @@ public class JobsController : BaseApiController
         return (job is null) ? NotFound() : job;
     }
 
+    [AllowAnonymous]
     [HttpGet("GetJobs")]
     public async Task<ActionResult<List<Job>>> GetJobs(bool haveToar, int salary, bool haveEnglish)
     {
@@ -48,22 +103,9 @@ public class JobsController : BaseApiController
         return (res2.Count == 0) ? NotFound() : res2;
     }
 
-    [HttpGet("get-My-Saved-Jobs")]
-    public async Task<ActionResult<List<Job>>> getMySavedJobs()
-    {
-        var user = (await GetUser());
+    
 
 
-        //_context.Users.Where(x => x.Id == user.Id)
-        //     .Applicants..Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
-        //var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
-        //var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
-        return (1 == 0) ? NotFound() : NotFound();
-    }
-
-
-
-    [Authorize]
     [HttpDelete("DeleteJob/{JobId}")]
     public async Task<bool> DeleteJobById(int JobId)
     {
@@ -72,7 +114,6 @@ public class JobsController : BaseApiController
         return await _context.SaveChangesAsync() > 0;
     }
 
-    [Authorize]
     [HttpPut("FoundJob/{JobId}")]
     public async Task<bool> FoundJob(int JobId, [FromForm] bool found)
     {
@@ -86,7 +127,6 @@ public class JobsController : BaseApiController
         return await _context.SaveChangesAsync() > 0;
     }
 
-    [Authorize]
     [HttpPut("UpdateJob/{JobId}")]
     public async Task<ActionResult<bool>> UpdateJob(int JobId, JobUpdateDto JobUpdate)
     {
@@ -99,29 +139,8 @@ public class JobsController : BaseApiController
         return (await _context.SaveChangesAsync() > 0) ? NoContent() : BadRequest("failed to update job");
     }
 
-    [Authorize]
-    [HttpGet("{JobId}/Applicants")]
-    public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
-    {
-        var user = await GetUser();
+    
 
-        // Todo: Add auth for rec
-        var job = await _context.Jobs.Include(x => x.Applicants).FirstAsync(x => x.Id == JobId && !x.Deleted);
-
-        return Ok(job.Applicants.Select(x => new
-        {
-            x.Create,
-            x.CvId,
-            x.Id,
-            x.LinkedinLink,
-            x.UserId,
-        }));
-    }
-    private async Task<AppUser> GetUser()
-    {
-        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
-    }
 
     private async Task<ActionResult<Recruiter>> GetRecInfo()
     {
