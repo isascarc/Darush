@@ -1,4 +1,3 @@
-
 using MyJob.Models;
 
 namespace MyJob.Controllers;
@@ -131,10 +130,5 @@ public class AccountController : BaseApiController
 
         user.Deleted = true;
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
-    }
-
-    public async Task<bool> UserExist(string username)
-    {
-        return await Context.Users.AnyAsync(x => x.UserName == username.ToLower());
     }
 }
