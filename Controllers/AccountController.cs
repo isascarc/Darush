@@ -61,7 +61,7 @@ public class AccountController : BaseApiController
         return new UserDto
         {
             UserName = user.UserName,
-            Token = _tokenService.CreateToken(user.UserName,   "user"),
+            Token = _tokenService.CreateToken(user.UserName, "user"),
             KnownAs = user.KnownAs
         };
     }
@@ -149,7 +149,7 @@ public class AccountController : BaseApiController
         using (var client = new MailKit.Net.Smtp.SmtpClient())
         {
             client.Connect("smtp.gmail.com", 587, false);
-            client.Authenticate("isscr01@gmail.com", Globals.GmailCode);
+            client.Authenticate("isscr01@gmail.com", Helpers.Globals.GmailCode);
             var a = client.Send(message);
             client.Disconnect(true);
         }
