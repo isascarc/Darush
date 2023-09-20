@@ -21,6 +21,8 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<UserDto>> Register2(RegisterDto2 registerDto)
     {
         return await Register(new RegisterDto() { username = registerDto.username, password = registerDto.password });
+
+
         //if (await UserExist(registerDto.username))
         //    return BadRequest("username is taken");
 
