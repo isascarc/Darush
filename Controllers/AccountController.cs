@@ -2,16 +2,16 @@ using MimeKit;
 
 namespace MyJob.Controllers;
 
-[Authorize(Roles = "user")]
+[Authorize(Roles = Roles.User)]
 public class AccountController : BaseApiController
 {
-    public DataContext _context { get; }
-    public ITokenService _tokenService { get; }
+    public DataContext Context { get; }
+    public ITokenService TokenService { get; }
 
     public AccountController(DataContext context, ITokenService tokenService)
     {
-        _context = context;
-        _tokenService = tokenService;
+        Context = context;
+        TokenService = tokenService;
     }
 
 
@@ -55,13 +55,13 @@ public class AccountController : BaseApiController
         user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.password));
         user.PasswordSalt = hmac.Key;
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        Context.Users.Add(user);
+        await Context.SaveChangesAsync();
 
         return new UserDto
         {
             UserName = user.UserName,
-            Token = _tokenService.CreateToken(user.UserName, "user"),
+            Token = TokenService.CreateToken(user.UserName, "user"),
             KnownAs = user.KnownAs
         };
     }
@@ -69,7 +69,7 @@ public class AccountController : BaseApiController
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await _context.Users.Include(x => x.CVs).
+        var user = await Context.Users.Include(x => x.CVs).
            FirstOrDefaultAsync(x => x.UserName == loginDto.UserName && !x.Deleted);
         if (user is null)
             return Unauthorized("User not exist!!");
@@ -83,7 +83,7 @@ public class AccountController : BaseApiController
         return new UserDto
         {
             UserName = user.UserName,
-            Token = _tokenService.CreateToken(user.UserName, "user"),
+            Token = TokenService.CreateToken(user.UserName, "user"),
             KnownAs = user.KnownAs
         };
     }
@@ -94,7 +94,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
         var user = await GetUserInfo(false);
-        return Ok(await _context.Users.Where(x => !x.Deleted).ToListAsync());
+        return Ok(await Context.Users.Where(x => !x.Deleted).ToListAsync());
     }
 
     [HttpGet("Get-User-Data")]
@@ -113,9 +113,9 @@ public class AccountController : BaseApiController
         memberUpdateDto.Adapt(user);
 
         // Send new token if userName changed
-        return (await _context.SaveChangesAsync()) > 0 ?
+        return (await Context.SaveChangesAsync()) > 0 ?
             (isChangeName ?
-                Ok(new UserDto { UserName = user.UserName, Token = _tokenService.CreateToken(user.UserName, "user"), KnownAs = user.KnownAs })
+                Ok(new UserDto { UserName = user.UserName, Token = TokenService.CreateToken(user.UserName, "user"), KnownAs = user.KnownAs })
                 :
                 NoContent())
             : BadRequest("failed to update user.");
@@ -127,7 +127,7 @@ public class AccountController : BaseApiController
         var user = (await GetUserInfo());
 
         user.Deleted = true;
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 
     [HttpGet("send-email")]
@@ -158,16 +158,16 @@ public class AccountController : BaseApiController
 
     public async Task<bool> UserExist(string username)
     {
-        return await _context.Users.AnyAsync(x => x.UserName == username.ToLower());
+        return await Context.Users.AnyAsync(x => x.UserName == username.ToLower());
     }
 
     public async Task<AppUser> GetUserInfo(bool withCvs = true)
     {
         var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = withCvs ?
-            await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted)
+            await Context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted)
             :
-            await _context.Users.FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted);
+            await Context.Users.FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted);
 
         return user;
     }
