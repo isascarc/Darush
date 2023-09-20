@@ -36,7 +36,7 @@ public class ShareController : BaseApiController
         using (var client = new MailKit.Net.Smtp.SmtpClient())
         {
             client.Connect("smtp.gmail.com", 587, false);
-            client.Authenticate(ourEmailAddress, Globals.GmailCode);
+            client.Authenticate(ourEmailAddress,Helpers.Globals.GmailCode);
             var a = client.Send(message);
             client.Disconnect(true);
         }
