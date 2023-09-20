@@ -43,6 +43,7 @@ public class AccountController : BaseApiController
         //    KnownAs = user.KnownAs
         //};
     }
+
     [AllowAnonymous]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
@@ -130,32 +131,6 @@ public class AccountController : BaseApiController
 
         user.Deleted = true;
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
-    }
-
-    [HttpGet("send-email")]
-    public async Task<ActionResult> Sendemail()
-    {
-        var user = (await GetUserInfo());
-
-        var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("Darush", "isascarch@gmail.com"));
-        message.To.Add(new MailboxAddress(user.UserName, user.Mail));
-        message.Subject = "How you doin'?";
-
-
-        message.Body = new TextPart("plain")
-        {
-            Text = "Hey Chandler,I just wanted to let you know that Monica and I were going to go play some paintball, you in?"
-        };
-
-        using (var client = new MailKit.Net.Smtp.SmtpClient())
-        {
-            client.Connect("smtp.gmail.com", 587, false);
-            client.Authenticate("isscr01@gmail.com", Helpers.Globals.GmailCode);
-            var a = client.Send(message);
-            client.Disconnect(true);
-        }
-        return Ok();
     }
 
     public async Task<bool> UserExist(string username)
