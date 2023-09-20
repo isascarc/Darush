@@ -1,14 +1,17 @@
+using DocumentFormat.OpenXml.InkML;
+using MyJob.Models;
+
 namespace MyJob.Controllers;
 
 [Authorize(Roles = "user")]
 public class ApplicantsController : BaseApiController
 {
-    public DataContext _context { get; }
+    public DataContext Context { get; }
     public ITokenService _tokenService { get; }
 
     public ApplicantsController(DataContext context, ITokenService tokenService)
     {
-        _context = context;
+        Context = context;
         _tokenService = tokenService;
     }
 
@@ -16,13 +19,13 @@ public class ApplicantsController : BaseApiController
     public async Task<ActionResult<UserDto>> Create(int JobId)
     {
         // Check user
-        var user = await GetUser();
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
         if (user == null)
             return Unauthorized();
         if (user.CVs.Count < 1)
             return NotFound("Please upload a resume.");
 
-        var job = await _context.Jobs.Include(x => x.Applicants).FirstOrDefaultAsync(x => x.Id == JobId);
+        var job = await Context.Jobs.Include(x => x.Applicants).FirstOrDefaultAsync(x => x.Id == JobId);
         if (job == null)
             return NotFound("Job Not Found.");
 
@@ -36,13 +39,13 @@ public class ApplicantsController : BaseApiController
                 }
             );
 
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to Applicant user.");
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to Applicant user.");
     }
 
     [HttpGet("Get-all-Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants()
     {
-        return Ok(await _context.Applicants.Where(x => !x.Deleted).Select(x => new
+        return Ok(await Context.Applicants.Where(x => !x.Deleted).Select(x => new
         {
             x.Id,
             x.JobId,
@@ -57,22 +60,16 @@ public class ApplicantsController : BaseApiController
     public async Task<ActionResult> Delete(int ApplicantId)
     {
         // Check user
-        var user = await GetUser();
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
         if (user == null)
             return Unauthorized();
 
-        var Applicant = await _context.Applicants.Where(x => x.Id == ApplicantId && x.UserId == user.Id && !x.Deleted).FirstOrDefaultAsync();
+        var Applicant = await Context.Applicants.Where(x => x.Id == ApplicantId && x.UserId == user.Id && !x.Deleted).FirstOrDefaultAsync();
         if (Applicant == null)
             return NotFound("Applicant not exist.");
 
         Applicant.Deleted = true;
 
-        return (await _context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
-    }
-
-    public async Task<AppUser> GetUser()
-    {
-        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
 }
