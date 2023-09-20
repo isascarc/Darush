@@ -48,7 +48,7 @@ public class AccountController : BaseApiController
     [AllowAnonymous]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
-        if (await UserExist(registerDto.username))
+        if (await UserFuncs.UserExist(Context, registerDto.username))
             return BadRequest("username is taken");
 
         var user = registerDto.Adapt<AppUser>();
