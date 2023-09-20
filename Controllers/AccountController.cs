@@ -1,4 +1,5 @@
-using MimeKit;
+
+using MyJob.Models;
 
 namespace MyJob.Controllers;
 
@@ -90,27 +91,26 @@ public class AccountController : BaseApiController
             KnownAs = user.KnownAs
         };
     }
-
     #endregion
 
     [HttpGet("Get-all-users")]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
-        var user = await GetUserInfo(false);
+        var user = await UserFuncs.GetUserInfo(Context, User, false);
         return Ok(await Context.Users.Where(x => !x.Deleted).ToListAsync());
     }
 
     [HttpGet("Get-User-Data")]
     public async Task<ActionResult> GetUserData()
     {
-        var x = await GetUserInfo(false);
-        return Ok(x);
+        var user = await UserFuncs.GetUserInfo(Context, User, false);
+        return Ok(user);
     }
 
     [HttpPut("Update-User")]
     public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
     {
-        var user = (await GetUserInfo());
+        var user = await UserFuncs.GetUserInfo(Context, User, false);
         var isChangeName = memberUpdateDto.UserName == user.UserName;
 
         memberUpdateDto.Adapt(user);
@@ -127,7 +127,7 @@ public class AccountController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult> Delete()
     {
-        var user = (await GetUserInfo());
+        var user = await UserFuncs.GetUserInfo(Context, User, false);
 
         user.Deleted = true;
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
@@ -136,16 +136,5 @@ public class AccountController : BaseApiController
     public async Task<bool> UserExist(string username)
     {
         return await Context.Users.AnyAsync(x => x.UserName == username.ToLower());
-    }
-
-    public async Task<AppUser> GetUserInfo(bool withCvs = true)
-    {
-        var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = withCvs ?
-            await Context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted)
-            :
-            await Context.Users.FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted);
-
-        return user;
     }
 }
