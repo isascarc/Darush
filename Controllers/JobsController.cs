@@ -2,7 +2,6 @@ namespace MyJob.Controllers;
 
 
 // This class exist for users authorize
-
 [ApiController]
 [Route("jobs")]
 [Authorize(Roles = "user")]
@@ -31,8 +30,6 @@ public class JobsControllerForUser : ControllerBase
     public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
     {
         var user = await GetUser();
-
-        // Todo: Add auth for rec
         var job = await _context.Jobs.Include(x => x.Applicants).FirstAsync(x => x.Id == JobId && !x.Deleted);
 
         return Ok(job.Applicants.Select(x => new
