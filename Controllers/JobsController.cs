@@ -8,7 +8,7 @@ namespace MyJob.Controllers;
 [Authorize(Roles = "user")]
 public class JobsControllerForUser : ControllerBase
 {
-     public DataContext _context { get; }
+    public DataContext _context { get; }
     public JobsControllerForUser(DataContext context)
     {
         _context = context;
@@ -53,8 +53,7 @@ public class JobsControllerForUser : ControllerBase
 }
 
 
-
-[Authorize(Roles = "recruiter")]
+[Authorize(Roles = Roles.Recruiter)]
 public partial class JobsController : BaseApiController
 {
     public DataContext Context { get; }
@@ -92,7 +91,7 @@ public partial class JobsController : BaseApiController
         job.Deleted = true;
         return await Context.SaveChangesAsync() > 0;
     }
-    
+
     [HttpPut("FoundJob/{JobId}")]
     public async Task<bool> FoundJob(int JobId, [FromForm] bool found)
     {

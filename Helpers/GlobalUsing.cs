@@ -24,3 +24,4 @@ global using MyJob.Interfaces;
 global using MyJob.Entities;
 global using MyJob.Extensions;
 global using MyJob.Helpers;
+global using MyJob.Globals;
