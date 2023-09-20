@@ -56,10 +56,10 @@ public class JobsControllerForUser : ControllerBase
 [Authorize(Roles = "recruiter")]
 public partial class JobsController : BaseApiController
 {
-    public DataContext _context { get; }
+    public DataContext Context { get; }
     public JobsController(DataContext context)
     {
-        _context = context;
+        Context = context;
     }
 
 
@@ -81,7 +81,7 @@ public partial class JobsController : BaseApiController
         };
 
         rec.Jobs.Add(newItem);
-        int affectedRows = _context.SaveChanges();
+        int affectedRows = Context.SaveChanges();
         return Ok(affectedRows > 0);
     }
 
@@ -89,7 +89,7 @@ public partial class JobsController : BaseApiController
     [HttpGet("GetJobById/{JobId}")]
     public async Task<ActionResult<Job>> GetJobById(int JobId)
     {
-        var job = await _context.Jobs.FirstOrDefaultAsync(x => x.Id == JobId && !x.Deleted && !x.Found);
+        var job = await Context.Jobs.FirstOrDefaultAsync(x => x.Id == JobId && !x.Deleted && !x.Found);
         return (job is null) ? NotFound() : job;
     }
 
@@ -97,7 +97,7 @@ public partial class JobsController : BaseApiController
     [HttpGet("GetJobs")]
     public async Task<ActionResult<List<Job>>> GetJobs(bool haveToar, int salary, bool haveEnglish)
     {
-        var salaryCond = _context.Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
+        var salaryCond = Context.Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
         var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
         var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
         return (res2.Count == 0) ? NotFound() : res2;
@@ -109,34 +109,34 @@ public partial class JobsController : BaseApiController
     [HttpDelete("DeleteJob/{JobId}")]
     public async Task<bool> DeleteJobById(int JobId)
     {
-        var job = await _context.Jobs.FirstAsync(x => x.Id == JobId);
+        var job = await Context.Jobs.FirstAsync(x => x.Id == JobId);
         job.Deleted = true;
-        return await _context.SaveChangesAsync() > 0;
+        return await Context.SaveChangesAsync() > 0;
     }
 
     [HttpPut("FoundJob/{JobId}")]
     public async Task<bool> FoundJob(int JobId, [FromForm] bool found)
     {
-        var job = await _context.Jobs.FirstAsync(x => x.Id == JobId);
+        var job = await Context.Jobs.FirstAsync(x => x.Id == JobId);
         if (job.Found != found)
         {
             job.Found = found;
             if (found)
                 job.FoundDate = DateTime.Now;
         }
-        return await _context.SaveChangesAsync() > 0;
+        return await Context.SaveChangesAsync() > 0;
     }
 
     [HttpPut("UpdateJob/{JobId}")]
     public async Task<ActionResult<bool>> UpdateJob(int JobId, JobUpdateDto JobUpdate)
     {
-        var job = await _context.Jobs.FirstAsync(x => x.Id == JobId);
+        var job = await Context.Jobs.FirstAsync(x => x.Id == JobId);
         job.haveToar = JobUpdate.haveToar;
         job.EnglishNeed = JobUpdate.haveEnglish;
         job.text = JobUpdate.jobDetails;
         job.salary = JobUpdate.salary;
 
-        return (await _context.SaveChangesAsync() > 0) ? NoContent() : BadRequest("failed to update job");
+        return (await Context.SaveChangesAsync() > 0) ? NoContent() : BadRequest("failed to update job");
     }
 
     
@@ -145,7 +145,7 @@ public partial class JobsController : BaseApiController
     private async Task<ActionResult<Recruiter>> GetRecInfo()
     {
         var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await _context.Recruiters.Include(x => x.Jobs)
+        return await Context.Recruiters.Include(x => x.Jobs)
             .FirstOrDefaultAsync(x => x.RecName == userName && !x.Deleted);
     }
 
