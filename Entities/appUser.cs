@@ -13,7 +13,7 @@ public class AppUser
     public string KnownAs { get; set; }
     [Required] public DateTime Create { get; set; } = DateTime.UtcNow;
     [Required] public DateTime LastActive { get; set; } = DateTime.UtcNow;
-    public string Gender { get; set; }        
+    public string Gender { get; set; }
     public string City { get; set; }
     public string Mail { get; set; }
     public string Phone { get; set; }
@@ -26,9 +26,9 @@ public class AppUser
     public string _savedJobs { get; set; }
 
     [NotMapped]
-    public int[] SavedJobs
+    public List<int> SavedJobs
     {
-        get { return JsonSerializer.Deserialize<int[]>(_savedJobs); }
+        get { return JsonSerializer.Deserialize<List<int>>(_savedJobs); }
         set { _savedJobs = JsonSerializer.Serialize(value); }
     }
 

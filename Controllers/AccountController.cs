@@ -2,7 +2,6 @@ using MyJob.Models;
 
 namespace MyJob.Controllers;
 
-
 // This class exist for Admin authorize
 [ApiController]
 [Route("account")]
@@ -14,7 +13,7 @@ public class AccountControllerForAdmin : ControllerBase
     {
         Context = context;
     }
-    
+
     [HttpGet]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
@@ -92,9 +91,6 @@ public class AccountController : BaseApiController
     public async Task<ActionResult> GetUserData()
     {
         var user = await UserFuncs.GetUserInfo(Context, User, false);
-
-        //user.SavedJobs = new[] { 143 };
-        //Context.SaveChanges();
         return Ok(user);
     }
 
