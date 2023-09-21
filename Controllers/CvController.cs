@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using ClosedXML.Excel;
+using MyJob.Models;
 
 namespace MyJob.Controllers;
 
@@ -22,26 +23,25 @@ public class CvController : BaseApiController
     const string zipFormat = "application/zip";
     const string excelFormat = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-
     public CvController(DataContext context, ITokenService tokenService)
     {
         Context = context;
         TokenService = tokenService;
     }
 
-    [HttpGet("Get-all")]
+    
+    [HttpGet]
     public async Task<ActionResult<List<object>>> GetAllCVsData()
     {
-        var user = (await GetUserInfo()).Value;
-
-        return Ok(GetAllActualCv(user).Select(x => new { x.IsDefault, x.Name, x.Text, x.DateOfAdded }).ToList());
+        var user = await UserFuncs.GetUserInfo(Context, User);
+        return Ok(user.GetActualCvs().Select(x => new { x.IsDefault, x.Name, x.Text, x.DateOfAdded }));
     }
 
-    [HttpGet]
+    [HttpGet("as-zip")]
     public async Task<ActionResult> GetAllCVs()
     {
-        var user = (await GetUserInfo()).Value;
-        var allCvs = GetAllActualCv(user);
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
+        var allCvs = user.GetActualCvs();
 
         if (allCvs.Count > 0)
         {
@@ -65,8 +65,8 @@ public class CvController : BaseApiController
     [HttpGet("{CvId}")]
     public async Task<ActionResult> GetCV(int CvId)
     {
-        var user = (await GetUserInfo()).Value;
-        var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
+        var cv = user.GetActualCvs().ElementAtOrDefault(CvId);
 
         if (cv is not null)
             return File(cv.FileContent, Types[cv.Text], $"{cv.Name}");
@@ -77,8 +77,8 @@ public class CvController : BaseApiController
     [HttpGet("GetAllAsExcel")]
     public async Task<ActionResult> GetAllAsExcel()
     {
-        var user = (await GetUserInfo()).Value;
-        var allCvs = GetAllActualCv(user);
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
+        var allCvs = user.GetActualCvs();
 
         if (allCvs.Count > 0)
         {
@@ -115,12 +115,12 @@ public class CvController : BaseApiController
     [HttpPut("set-cv-as-default/{CvId}")]
     public async Task<ActionResult> SetCVAsDefault(int CvId)
     {
-        var user = (await GetUserInfo()).Value;
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
 
-        if (GetAllActualCv(user).ElementAtOrDefault(CvId) is not null)
+        if (user.GetActualCvs().ElementAtOrDefault(CvId) is not null)
         {
-            GetAllActualCv(user).ForEach(x => x.IsDefault = false);
-            GetAllActualCv(user)[CvId].IsDefault = true;
+            user.GetActualCvs().ForEach(x => x.IsDefault = false);
+            user.GetActualCvs()[CvId].IsDefault = true;
         }
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
@@ -128,9 +128,9 @@ public class CvController : BaseApiController
     [HttpPut("cv-Change-Name/{CvId}")]
     public async Task<ActionResult> CVChangeName(int CvId, string newName)
     {
-        var user = (await GetUserInfo()).Value;
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
 
-        var allCvs = GetAllActualCv(user);
+        var allCvs = user.GetActualCvs();
         if (allCvs.Count > CvId)
         {
             if (allCvs.Any(x => x.Name == newName))
@@ -145,7 +145,7 @@ public class CvController : BaseApiController
     [HttpPost("add")]
     public async Task<ActionResult> AddCV([FromForm] CvDto cv)
     {
-        var user = (await GetUserInfo()).Value;
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
 
         // Check file
         if (cv.File is null || cv.File.Length < 1)
@@ -182,9 +182,9 @@ public class CvController : BaseApiController
     [HttpDelete("{CvId}")]
     public async Task<ActionResult> DeleteCv(int CvId)
     {
-        var user = (await GetUserInfo()).Value;
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
 
-        var cv = GetAllActualCv(user).ElementAtOrDefault(CvId);
+        var cv = user.GetActualCvs().ElementAtOrDefault(CvId);
         if (cv is null)
             return BadRequest("CV not exist");
 
@@ -197,8 +197,7 @@ public class CvController : BaseApiController
     [HttpGet("Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants()
     {
-        var user = (await GetUserInfo()).Value;
-
+        var user = await UserFuncs.GetUserInfo(Context, User, true);
         var Applicants = await Context.Applicants.Where(x => x.UserId == user.Id).Take(100).Select(x => new
         {
             x.Create,
@@ -209,20 +208,5 @@ public class CvController : BaseApiController
         }).ToListAsync();
 
         return Ok(Applicants);
-    }
-
-
-    public List<CV> GetAllActualCv(AppUser user)
-        => user.CVs.Where(x => !x.Deleted).ToList();
-
-
-    async Task<ActionResult<AppUser>> GetUserInfo()
-    {
-        var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = await Context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
-
-        if (user == null)
-            return Unauthorized();
-        return user;
     }
 }

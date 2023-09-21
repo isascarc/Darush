@@ -2,6 +2,9 @@
 
 public static class UserFuncs
 {
+    public static List<CV> GetActualCvs(this AppUser user)
+       => user.CVs.Where(x => !x.Deleted).ToList();
+
     public static async Task<bool> UserExist(DataContext context, string username)
     {
         return await context.Users.AnyAsync(x => x.UserName == username.ToLower());
