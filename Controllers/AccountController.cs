@@ -2,6 +2,28 @@ using MyJob.Models;
 
 namespace MyJob.Controllers;
 
+
+// This class exist for Admin authorize
+[ApiController]
+[Route("account")]
+[Authorize(Roles = Roles.Admin)]
+public class AccountControllerForAdmin : ControllerBase
+{
+    public DataContext Context { get; }
+    public AccountControllerForAdmin(DataContext context)
+    {
+        Context = context;
+    }
+    
+    [HttpGet]
+    public async Task<ActionResult<List<object>>> GetAllUsers()
+    {
+        var user = await UserFuncs.GetUserInfo(Context, User, false);
+        return Ok(await Context.Users.Where(x => !x.Deleted).ToListAsync());
+    }
+}
+
+
 [Authorize(Roles = Roles.User)]
 public class AccountController : BaseApiController
 {
@@ -68,6 +90,7 @@ public class AccountController : BaseApiController
             KnownAs = user.KnownAs
         };
     }
+
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
@@ -92,14 +115,7 @@ public class AccountController : BaseApiController
     }
     #endregion
 
-    [HttpGet("Get-all-users")]
-    public async Task<ActionResult<List<object>>> GetAllUsers()
-    {
-        var user = await UserFuncs.GetUserInfo(Context, User, false);
-        return Ok(await Context.Users.Where(x => !x.Deleted).ToListAsync());
-    }
-
-    [HttpGet("Get-User-Data")]
+    [HttpGet("user-data")]
     public async Task<ActionResult> GetUserData()
     {
         var user = await UserFuncs.GetUserInfo(Context, User, false);
