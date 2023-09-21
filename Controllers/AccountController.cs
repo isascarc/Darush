@@ -38,34 +38,7 @@ public class AccountController : BaseApiController
 
 
     #region Register & login
-    [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<ActionResult<UserDto>> Register2(RegisterDto2 registerDto)
-    {
-        return await Register(new RegisterDto() { username = registerDto.username, password = registerDto.password });
-
-
-        //if (await UserExist(registerDto.username))
-        //    return BadRequest("username is taken");
-
-        //var user = _mapper.Map<AppUser>(registerDto);
-        //using var hmac = new HMACSHA512();
-
-        //user.UserName = registerDto.username.ToLower();
-        //user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.password));
-        //user.PasswordSalt = hmac.Key;
-
-        //_context.Users.Add(user);
-        //await _context.SaveChangesAsync();
-
-        //return new UserDto
-        //{
-        //    UserName = user.UserName,
-        //    Token = _tokenService.CreateToken(user),
-        //    KnownAs = user.KnownAs
-        //};
-    }
-
     [AllowAnonymous]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
