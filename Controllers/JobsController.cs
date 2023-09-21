@@ -1,6 +1,5 @@
 namespace MyJob.Controllers;
 
-
 // This class exist for users authorize
 [ApiController]
 [Route("jobs")]
