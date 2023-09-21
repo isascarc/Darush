@@ -7,10 +7,10 @@ namespace MyJob.Controllers;
 [Authorize(Roles = "user")]
 public class JobsControllerForUser : ControllerBase
 {
-    public DataContext _context { get; }
+    public DataContext Context { get; }
     public JobsControllerForUser(DataContext context)
     {
-        _context = context;
+        Context = context;
     }
 
     [HttpGet("get-My-Saved-Jobs")]
@@ -30,7 +30,7 @@ public class JobsControllerForUser : ControllerBase
     public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
     {
         var user = await GetUser();
-        var job = await _context.Jobs.Include(x => x.Applicants).FirstAsync(x => x.Id == JobId && !x.Deleted);
+        var job = await Context.Jobs.Include(x => x.Applicants).FirstAsync(x => x.Id == JobId && !x.Deleted);
 
         return Ok(job.Applicants.Select(x => new
         {
@@ -45,7 +45,7 @@ public class JobsControllerForUser : ControllerBase
     private async Task<AppUser> GetUser()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return await _context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
+        return await Context.Users.Include(p => p.CVs).FirstOrDefaultAsync(x => x.UserName == usName && !x.Deleted);
     }
 }
 
