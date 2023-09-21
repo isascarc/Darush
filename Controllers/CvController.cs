@@ -112,7 +112,7 @@ public class CvController : BaseApiController
         return BadRequest("CV not exist");
     }
 
-    [HttpPut("set-cv-as-default/{CvId}")]
+    [HttpPut("set-as-default/{CvId}")]
     public async Task<ActionResult> SetCVAsDefault(int CvId)
     {
         var user = await UserFuncs.GetUserInfo(Context, User, true);
@@ -142,7 +142,7 @@ public class CvController : BaseApiController
     }
 
 
-    [HttpPost("add")]
+    [HttpPost]
     public async Task<ActionResult> AddCV([FromForm] CvDto cv)
     {
         var user = await UserFuncs.GetUserInfo(Context, User, true);
