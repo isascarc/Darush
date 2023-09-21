@@ -113,8 +113,6 @@ public class RecsController : BaseApiController
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await Context.Recruiters.FirstOrDefaultAsync(x => x.RecName == usName && !x.Deleted);
 
-        if (user == null)
-            return Unauthorized();
         return user;
     }
 }
