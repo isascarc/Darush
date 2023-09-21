@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Xml;
+
 namespace MyJob.Controllers;
 
 // This class exist for users authorize
@@ -16,7 +19,10 @@ public class JobsControllerForUser : ControllerBase
     public async Task<ActionResult<List<Job>>> getMySavedJobs()
     {
         var user = (await GetUser());
-
+        var entity = new 
+        {
+            MyArray = JsonSerializer.Serialize(new int[] {0,5})
+        };
 
         //_context.Users.Where(x => x.Id == user.Id)
         //     .Applicants..Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);

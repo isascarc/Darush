@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+
 namespace MyJob.Entities;
 
 public class AppUser
@@ -17,6 +20,17 @@ public class AppUser
     public string LinkedinLink { get; set; }
     public string WebsiteLink { get; set; }
     public bool Deleted { get; set; } = false;
+
+    [Column("SavedJobs")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
+    public string _savedJobs { get; set; }
+
+    [NotMapped]
+    public int[] SavedJobs
+    {
+        get { return JsonSerializer.Deserialize<int[]>(_savedJobs); }
+        set { _savedJobs = JsonSerializer.Serialize(value); }
+    }
 
     public List<CV> CVs { get; set; } = new();
 }
