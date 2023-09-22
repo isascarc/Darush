@@ -10,11 +10,19 @@ public class SavedJobsController : BaseApiController
         Context = context;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<int>>> GetAllSavedJobs()
+    [HttpGet("as-ids")]
+    public async Task<ActionResult<List<int>>> GetAllSavedJobIds()
     {
-        var user = (await UserFuncs.GetUserInfo(Context, User, false));
+        var user = await UserFuncs.GetUserInfo(Context, User, false);
         return user.SavedJobs;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<Job>>> GetAllSavedJobs()
+    {
+        var user = await UserFuncs.GetUserInfo(Context, User, false);
+        var jobs = Context.Jobs.Where(x => user.SavedJobs.Contains(x.Id)).ToList();
+        return jobs;
     }
 
     [HttpPost]
