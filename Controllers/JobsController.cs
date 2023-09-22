@@ -15,22 +15,6 @@ public class JobsControllerForUser : ControllerBase
         Context = context;
     }
 
-    [HttpGet("get-My-Saved-Jobs")]
-    public async Task<ActionResult<List<Job>>> getMySavedJobs()
-    {
-        var user = (await GetUser());
-        var entity = new 
-        {
-            MyArray = JsonSerializer.Serialize(new int[] {0,5})
-        };
-
-        //_context.Users.Where(x => x.Id == user.Id)
-        //     .Applicants..Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
-        //var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
-        //var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
-        return (1 == 0) ? NotFound() : NotFound();
-    }
-
     [HttpGet("{JobId}/Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
     {
