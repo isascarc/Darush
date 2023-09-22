@@ -39,6 +39,22 @@ public class SavedJobsController : BaseApiController
 
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
+    
+    
+    [HttpDelete("{jobId}")]
+    public async Task<ActionResult> RemoveSavedJob(int jobId)
+    {
+        var user = (await UserFuncs.GetUserInfo(Context, User, false));
+
+        if (user.SavedJobs.Contains(jobId))
+        {
+            var SavedJobs = user.SavedJobs;
+            SavedJobs.Remove(jobId);
+            user.SavedJobs = new(SavedJobs);
+        }
+
+        return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
+    }
 
 
 
