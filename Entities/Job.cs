@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace MyJob.Entities;
 
 public class Job
@@ -12,6 +14,10 @@ public class Job
     public int Area { get; set; }
     public DateTime FoundDate { get; set; } = DateTime.UnixEpoch;
     public bool Deleted { get; set; }
+
+    // Just for return to user
+    [NotMapped]
+    public bool IsSaved { get; set; }
 
     public List<Applicant> Applicants { get; set; } = new();
 

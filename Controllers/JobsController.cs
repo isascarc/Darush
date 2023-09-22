@@ -120,6 +120,13 @@ public partial class JobsController : BaseApiController
         var salaryCond = Context.Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
         var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
         var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
+
+
+        // Add saved param, where is correct
+        var user = await UserFuncs.GetUserInfo(Context, User, false);
+        res2.Where(x => user.SavedJobs.Contains(x.Id)).ToList().ForEach(x => x.IsSaved = true);
+
+
         return (res2.Count == 0) ? NotFound() : res2;
     }
 
