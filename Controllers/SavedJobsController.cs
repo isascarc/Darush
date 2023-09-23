@@ -4,7 +4,7 @@ namespace MyJob.Controllers;
 public class SavedJobsController(DataContext Context) : BaseApiController
 {
     [HttpGet("as-ids")]
-    public async Task<ActionResult<List<int>>> GetAllSavedJobIds()
+    public async Task<ActionResult<SortedSet<int>>> GetAllSavedJobIds()
     {
         var user = await UserFuncs.GetUserInfo(Context, User, false);
         return user.SavedJobs;

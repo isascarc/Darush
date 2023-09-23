@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 
@@ -26,9 +27,9 @@ public class AppUser
     public string _savedJobs { get; set; }
 
     [NotMapped]
-    public List<int> SavedJobs
+    public SortedSet<int> SavedJobs
     {
-        get { return JsonSerializer.Deserialize<List<int>>(_savedJobs); }
+        get { return JsonSerializer.Deserialize< SortedSet<int>>(_savedJobs); }
         set { _savedJobs = JsonSerializer.Serialize(value); }
     }
 
