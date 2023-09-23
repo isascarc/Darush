@@ -31,7 +31,7 @@ public class JobsControllerForUser(DataContext Context) : ControllerBase
 
 
 [Authorize(Roles = Roles.Recruiter)]
-public partial class JobsController (DataContext Context) : ControllerBase
+public partial class JobsController (DataContext Context) : BaseApiController
 {
     [HttpPost]
     public async Task<ActionResult> Create(JobDto newJob)
