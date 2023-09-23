@@ -1,20 +1,11 @@
-using System.Text.Json;
-using System.Xml;
-
 namespace MyJob.Controllers;
 
 // This class exist for users authorize
 [ApiController]
 [Route("jobs")]
 [Authorize(Roles = "user")]
-public class JobsControllerForUser : ControllerBase
+public class JobsControllerForUser(DataContext Context) : ControllerBase
 {
-    public DataContext Context { get; }
-    public JobsControllerForUser(DataContext context)
-    {
-        Context = context;
-    }
-
     [HttpGet("{JobId}/Applicants")]
     public async Task<ActionResult<List<object>>> GetAllApplicants(int JobId)
     {
@@ -40,14 +31,8 @@ public class JobsControllerForUser : ControllerBase
 
 
 [Authorize(Roles = Roles.Recruiter)]
-public partial class JobsController : BaseApiController
+public partial class JobsController (DataContext Context) : ControllerBase
 {
-    public DataContext Context { get; }
-    public JobsController(DataContext context)
-    {
-        Context = context;
-    }
-
     [HttpPost]
     public async Task<ActionResult> Create(JobDto newJob)
     {
