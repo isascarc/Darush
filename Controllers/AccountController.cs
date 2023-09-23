@@ -18,9 +18,9 @@ public class AccountControllerForAdmin(DataContext Context) : ControllerBase
 
 
 [Authorize(Roles = Roles.User)]
-public class AccountController(DataContext Context, ITokenService tokenService) : ControllerBase
+public class AccountController(DataContext Context, ITokenService TokenService) : BaseApiController
 {
-#region Register & login
+    #region Register & login
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
