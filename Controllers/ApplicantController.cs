@@ -3,17 +3,8 @@ using MyJob.Models;
 namespace MyJob.Controllers;
 
 [Authorize(Roles = "user")]
-public class ApplicantsController : BaseApiController
+public class ApplicantsController(DataContext Context, ITokenService TokenService) : BaseApiController
 {
-    public DataContext Context { get; }
-    public ITokenService _tokenService { get; }
-
-    public ApplicantsController(DataContext context, ITokenService tokenService)
-    {
-        Context = context;
-        _tokenService = tokenService;
-    }
-
     [HttpPost("Create/{JobId}")]
     public async Task<ActionResult<UserDto>> Create(int JobId)
     {

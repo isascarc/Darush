@@ -6,14 +6,8 @@ namespace MyJob.Controllers;
 [ApiController]
 [Route("account")]
 [Authorize(Roles = Roles.Admin)]
-public class AccountControllerForAdmin : ControllerBase
+public class AccountControllerForAdmin(DataContext Context) : ControllerBase
 {
-    public DataContext Context { get; }
-    public AccountControllerForAdmin(DataContext context)
-    {
-        Context = context;
-    }
-
     [HttpGet]
     public async Task<ActionResult<List<object>>> GetAllUsers()
     {
@@ -24,19 +18,9 @@ public class AccountControllerForAdmin : ControllerBase
 
 
 [Authorize(Roles = Roles.User)]
-public class AccountController : BaseApiController
+public class AccountController(DataContext Context, ITokenService tokenService) : ControllerBase
 {
-    public DataContext Context { get; }
-    public ITokenService TokenService { get; }
-
-    public AccountController(DataContext context, ITokenService tokenService)
-    {
-        Context = context;
-        TokenService = tokenService;
-    }
-
-
-    #region Register & login
+#region Register & login
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)

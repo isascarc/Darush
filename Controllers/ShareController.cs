@@ -3,17 +3,9 @@ using MimeKit;
 namespace MyJob.Controllers;
 
 [Authorize]
-public class ShareController : BaseApiController
+public class ShareController(DataContext Context) : BaseApiController
 {
-    private DataContext Context { get; }
-    private ITokenService TokenService { get; }
     const string ourEmailAddress = "isscr01@gmail.com";
-
-    public ShareController(DataContext context, ITokenService tokenService)
-    {
-        Context = context;
-        TokenService = tokenService;
-    }
 
     [HttpPost("Send-to-email")]
     public async Task<ActionResult<UserDto>> Create(SendMailDto emailDetails)

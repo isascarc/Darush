@@ -1,15 +1,8 @@
 namespace MyJob.Controllers;
 
 [Authorize(Roles = Roles.User)]
-public class SavedJobsController : BaseApiController
+public class SavedJobsController(DataContext Context) : BaseApiController
 {
-    public DataContext Context { get; }
-
-    public SavedJobsController(DataContext context)
-    {
-        Context = context;
-    }
-
     [HttpGet("as-ids")]
     public async Task<ActionResult<List<int>>> GetAllSavedJobIds()
     {

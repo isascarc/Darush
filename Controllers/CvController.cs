@@ -1,16 +1,12 @@
 using System.IO.Compression;
 using ClosedXML.Excel;
-using MyJob.Models;
 
 namespace MyJob.Controllers;
 
 [Authorize(Roles = "user")]
 [Route("user/cv")]
-public class CvController : BaseApiController
+public class CvController(DataContext Context) : BaseApiController
 {
-    public DataContext Context { get; }
-    public ITokenService TokenService { get; }
-
     const int maxSizeInBytes = 100000;
     const int maxCVs = 5;
     readonly string[] SupportedFormats = new string[] { "doc", "docx", "pdf" };
@@ -22,12 +18,6 @@ public class CvController : BaseApiController
     };
     const string zipFormat = "application/zip";
     const string excelFormat = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
-    public CvController(DataContext context, ITokenService tokenService)
-    {
-        Context = context;
-        TokenService = tokenService;
-    }
 
     
     [HttpGet]

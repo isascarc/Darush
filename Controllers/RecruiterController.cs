@@ -1,17 +1,8 @@
 namespace MyJob.Controllers;
 
 [Authorize(Roles = "recruiter")]
-public class RecsController : BaseApiController
+public class RecsController(DataContext Context, ITokenService TokenService) : BaseApiController
 {
-    public DataContext Context { get; }
-    public ITokenService TokenService { get; }
-
-    public RecsController(DataContext context, ITokenService tokenService)
-    {
-        Context = context;
-        TokenService = tokenService;
-    }
-
     #region Register & login  
     [AllowAnonymous]
     [HttpPost("register")]
@@ -107,8 +98,8 @@ public class RecsController : BaseApiController
 
     private async Task<bool> RecExist(string username)
         => await Context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username.ToLower()));
-    
-    private  async Task<ActionResult<Recruiter>> GetRecInfo()
+
+    private async Task<ActionResult<Recruiter>> GetRecInfo()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await Context.Recruiters.FirstOrDefaultAsync(x => x.RecName == usName && !x.Deleted);
