@@ -1,17 +1,19 @@
+using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using MyJob.Models;
+using System.Linq;
+using System.Text.Json.Nodes;
 
 namespace MyJob.Controllers;
 
-[Authorize(Roles = "user")]
-public class ApplicantsController(DataContext Context, ITokenService TokenService) : BaseApiController
+[Authorize(Roles = Roles.User)]
+public class ApplicantsController(DataContext Context) : BaseApiController
 {
     [HttpPost("Create/{JobId}")]
-    public async Task<ActionResult<UserDto>> Create(int JobId)
+    public async Task<ActionResult> Create(int JobId)
     {
-        // Check user
-        var user = await UserFuncs.GetUserInfo(Context, User, true);
-        if (user == null)
-            return Unauthorized();
+        var user = await UserFuncs.GetUserInfo(Context, User);
+
         if (user.CVs.Count < 1)
             return NotFound("Please upload a resume.");
 
@@ -44,6 +46,25 @@ public class ApplicantsController(DataContext Context, ITokenService TokenServic
             x.CvId,
             x.UserId,
         }).ToListAsync());
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<JsonArray>> GetMyApplicants()
+    {
+        var user = await UserFuncs.GetUserInfo(Context, User);
+        var res = await (from app in Context.Set<Applicant>()
+                         where app.UserId == user.Id
+                         join job in Context.Set<Job>()
+                             on app.JobId equals job.Id
+                         select new { job, app }).ToListAsync();
+
+        var apps = res.Select(x => x.app);
+        var appsRet = apps.Adapt<List<ApplicantDto>>();
+
+        var jobs = res.Select(x => x.job);
+        var jobsRet = apps.Adapt<List<JobDto>>();
+
+        return Ok(new JsonArray() { appsRet, jobsRet });
     }
 
     [HttpDelete("delete/{ApplicantId}")]

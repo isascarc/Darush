@@ -10,7 +10,7 @@ public class SavedJobsController(DataContext Context) : BaseApiController
         return user.SavedJobs;
     }
 
-    [RequireHttps]
+    [HttpGet]
     public async Task<ActionResult<List<Job>>> GetAllSavedJobs()
     {
         var user = await UserFuncs.GetUserInfo(Context, User, false);
@@ -48,7 +48,6 @@ public class SavedJobsController(DataContext Context) : BaseApiController
 
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
     }
-
 
 
 
