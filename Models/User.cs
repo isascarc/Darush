@@ -18,4 +18,13 @@ public static class UserFuncs
             :
             await context.Users.FirstOrDefaultAsync(x => x.UserName == userName && !x.Deleted);
     }
+
+    public static IQueryable<AppUser> GetUserQuery(DataContext context, ClaimsPrincipal user, bool withCvs = true)
+    {
+        var userName = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return withCvs ?
+             context.Users.Include(p => p.CVs).Where(x => x.UserName == userName && !x.Deleted)
+            :
+            context.Users.Where(x => x.UserName == userName && !x.Deleted);
+    }
 }
