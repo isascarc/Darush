@@ -35,35 +35,28 @@ public class ApplicantsController(DataContext Context) : BaseApiController
     }
 
     [HttpGet("Get-all-Applicants")]
-    public async Task<ActionResult<List<object>>> GetAllApplicants()
+    public async Task<ActionResult<List<ApplicantDto>>> GetAllApplicants()
     {
-        return Ok(await Context.Applicants.Where(x => !x.Deleted).Select(x => new
-        {
-            x.Id,
-            x.JobId,
-            x.Create,
-            x.LinkedinLink,
-            x.CvId,
-            x.UserId,
-        }).ToListAsync());
+        var apps = await Context.Applicants.Where(x => !x.Deleted).ToListAsync();
+        return apps.Adapt<List<ApplicantDto>>();
     }
 
     [HttpGet]
     public async Task<ActionResult<JsonArray>> GetMyApplicants()
     {
-        var user = await UserFuncs.GetUserInfo(Context, User); 
+        var user = await UserFuncs.GetUserInfo(Context, User);
         var res = await (from applicant in Context.Set<Applicant>()
                          where applicant.UserId == user.Id
                          join job in Context.Set<Job>()
                          on applicant.JobId equals job.Id into appJobs
                          from appJob in appJobs.DefaultIfEmpty()
                          select new { Job = appJob, applicant }).ToListAsync();
-        
+
         var apps = res.Select(x => x.applicant);
         var appsRet = apps.Adapt<List<ApplicantDto>>();
 
         var jobs = res.Select(x => x.Job);
-        var jobsRet = apps.Adapt<List<JobDto>>();
+        var jobsRet = jobs.Adapt<List<JobDto>>();
 
         return Ok(new JsonArray() { appsRet, jobsRet });
     }

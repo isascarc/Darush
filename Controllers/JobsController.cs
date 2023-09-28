@@ -43,10 +43,10 @@ public partial class JobsController (DataContext Context) : BaseApiController
         Job newItem = new()
         {
             DateOfAdded = DateTime.Now,
-            haveToar = newJob.HaveToar,
-            text = newJob.JobDetails,
-            EnglishNeed = newJob.HaveEnglish,
-            salary = newJob.Salary,
+            haveToar = newJob.haveToar,
+            text = newJob.text,
+            EnglishNeed = newJob.EnglishNeed,
+            Salary = newJob.Salary,
             Area = newJob.Area,
         };
 
@@ -83,7 +83,7 @@ public partial class JobsController (DataContext Context) : BaseApiController
         job.haveToar = JobUpdate.haveToar;
         job.EnglishNeed = JobUpdate.haveEnglish;
         job.text = JobUpdate.jobDetails;
-        job.salary = JobUpdate.salary;
+        job.Salary = JobUpdate.salary;
 
         return (await Context.SaveChangesAsync() > 0) ? NoContent() : BadRequest("failed to update job");
     }
@@ -102,7 +102,7 @@ public partial class JobsController (DataContext Context) : BaseApiController
     [HttpGet("GetJobs")]
     public async Task<ActionResult<List<Job>>> GetJobs(bool haveToar, int salary, bool haveEnglish)
     {
-        var salaryCond = Context.Jobs.Where(x => x.salary >= salary && !x.Deleted && !x.Found);
+        var salaryCond = Context.Jobs.Where(x => x.Salary >= salary && !x.Deleted && !x.Found);
         var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
         var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
 
