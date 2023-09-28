@@ -51,17 +51,18 @@ public class ApplicantsController(DataContext Context) : BaseApiController
     [HttpGet]
     public async Task<ActionResult<JsonArray>> GetMyApplicants()
     {
-        var user = await UserFuncs.GetUserInfo(Context, User);
-        var res = await (from app in Context.Set<Applicant>()
-                         where app.UserId == user.Id
+        var user = await UserFuncs.GetUserInfo(Context, User); 
+        var res = await (from applicant in Context.Set<Applicant>()
+                         where applicant.UserId == user.Id
                          join job in Context.Set<Job>()
-                             on app.JobId equals job.Id
-                         select new { job, app }).ToListAsync();
-
-        var apps = res.Select(x => x.app);
+                         on applicant.JobId equals job.Id into appJobs
+                         from appJob in appJobs.DefaultIfEmpty()
+                         select new { Job = appJob, applicant }).ToListAsync();
+        
+        var apps = res.Select(x => x.applicant);
         var appsRet = apps.Adapt<List<ApplicantDto>>();
 
-        var jobs = res.Select(x => x.job);
+        var jobs = res.Select(x => x.Job);
         var jobsRet = apps.Adapt<List<JobDto>>();
 
         return Ok(new JsonArray() { appsRet, jobsRet });
