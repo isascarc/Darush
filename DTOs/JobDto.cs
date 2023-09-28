@@ -9,5 +9,6 @@ public class JobDto
     public bool haveToar { get; set; }
     public string text { get; set; }
     public int Area { get; set; }
+    public DateTime DateOfAdded { get; set; }
     // public string other { get; set; }
 }
