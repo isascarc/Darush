@@ -1,6 +1,6 @@
 namespace MyJob.Controllers;
 
-[Authorize(Roles = "recruiter")]
+[Authorize(Roles = Roles.Recruiter)]
 public class RecsController(DataContext Context, ITokenService TokenService) : BaseApiController
 {
     #region Register & login  
@@ -75,14 +75,14 @@ public class RecsController(DataContext Context, ITokenService TokenService) : B
     [HttpGet("Get-rec-Data")]
     public async Task<ActionResult> GetRecData()
     {
-        var rec = (await GetRecInfo()).Value;
+        var rec = (await GetRecInfo());
         return Ok(rec);
     }
 
     [HttpPut]
     public async Task<ActionResult> UpdateRec(RecUpdateDto recUpdateDto)
     {
-        var rec = (await GetRecInfo()).Value;
+        var rec = (await GetRecInfo());
         recUpdateDto.Adapt(rec);
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("failed to update rec.");
     }
@@ -90,7 +90,7 @@ public class RecsController(DataContext Context, ITokenService TokenService) : B
     [HttpDelete]
     public async Task<ActionResult> Delete()
     {
-        var rec = (await GetRecInfo()).Value;
+        var rec = (await GetRecInfo());
 
         rec.Deleted = true;
         return (await Context.SaveChangesAsync()) > 0 ? NoContent() : BadRequest("Problem occurred.");
@@ -99,11 +99,9 @@ public class RecsController(DataContext Context, ITokenService TokenService) : B
     private async Task<bool> RecExist(string username)
         => await Context.Recruiters.AnyAsync(x => string.Equals(x.RecName, username.ToLower()));
 
-    private async Task<ActionResult<Recruiter>> GetRecInfo()
+    private async Task<Recruiter> GetRecInfo()
     {
         var usName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = await Context.Recruiters.FirstOrDefaultAsync(x => x.RecName == usName && !x.Deleted);
-
-        return user;
+        return await Context.Recruiters.FirstOrDefaultAsync(x => x.RecName == usName && !x.Deleted);
     }
 }
