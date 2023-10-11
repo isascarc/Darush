@@ -2,21 +2,20 @@
 
 #nullable disable
 
-namespace MyJob.Migrations
+namespace MyJob.Migrations;
+
+/// <inheritdoc />
+public partial class FixSalary2 : Migration
 {
     /// <inheritdoc />
-    public partial class FixSalary2 : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
 
-        }
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
 
-        }
     }
 }

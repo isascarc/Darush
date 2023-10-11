@@ -12,5 +12,6 @@ public class MemberUpdateDto
     public string Phone { get; set; }
     public string LinkedinLink { get; set; }
     public string WebsiteLink { get; set; }
+    public bool ShowMe { get; set; }
     //todo:  public DateOnly DateOfBirth { get; set; }
 }

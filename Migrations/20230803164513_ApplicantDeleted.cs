@@ -2,28 +2,27 @@
 
 #nullable disable
 
-namespace MyJob.Migrations
+namespace MyJob.Migrations;
+
+/// <inheritdoc />
+public partial class ApplicantDeleted : Migration
 {
     /// <inheritdoc />
-    public partial class ApplicantDeleted : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<bool>(
-                name: "Deleted",
-                table: "Applicants",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: false);
-        }
+        migrationBuilder.AddColumn<bool>(
+            name: "Deleted",
+            table: "Applicants",
+            type: "INTEGER",
+            nullable: false,
+            defaultValue: false);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "Deleted",
-                table: "Applicants");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "Deleted",
+            table: "Applicants");
     }
 }

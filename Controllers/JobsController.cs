@@ -1,9 +1,11 @@
+using System.Text.Json.Nodes;
+
 namespace MyJob.Controllers;
 
 // This class exist for users authorize
 [ApiController]
 [Route("jobs")]
-[Authorize(Roles = "user")]
+[Authorize(Roles = Roles.User)]
 public class JobsControllerForUser(DataContext Context) : ControllerBase
 {
     [HttpGet("{JobId}/Applicants")]
@@ -31,8 +33,18 @@ public class JobsControllerForUser(DataContext Context) : ControllerBase
 
 
 [Authorize(Roles = Roles.Recruiter)]
-public partial class JobsController (DataContext Context) : BaseApiController
+public class JobsController(DataContext Context) : BaseApiController
 {
+    readonly Dictionary<int, string>  areas = new ()
+        {
+            {1, "ירושלים" },
+            {2, "מרכז" },
+            {3, "יהודה ושומרון" },
+            {4, "צפון" },
+            {5, "שפלה" },
+            {6, "דרום" },
+        };
+
     [HttpPost]
     public async Task<ActionResult> Create(JobDto newJob)
     {
@@ -99,12 +111,20 @@ public partial class JobsController (DataContext Context) : BaseApiController
     }
 
     [AllowAnonymous]
+    [HttpGet("areas")]
+    public async Task<ActionResult<JsonArray>> GetAreas()
+    {
+        return Ok(areas);
+    }
+
+    [AllowAnonymous]
     [HttpGet("GetJobs")]
-    public async Task<ActionResult<List<Job>>> GetJobs(bool haveToar, int salary, bool haveEnglish)
+    public async Task<ActionResult<List<Job>>> GetJobs(bool haveToar, int salary, bool haveEnglish, int area)
     {
         var salaryCond = Context.Jobs.Where(x => x.Salary >= salary && !x.Deleted && !x.Found);
         var res1 = (haveToar ? salaryCond : salaryCond.Where(x => !x.haveToar));
-        var res2 = await (haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed)).ToListAsync();
+        var res2 = haveEnglish ? res1 : res1.Where(x => !x.EnglishNeed);
+        var res3 = await (res2.Where(x => x.Area == area)).ToListAsync();
 
 
         // Add saved param, where is correct
@@ -112,7 +132,7 @@ public partial class JobsController (DataContext Context) : BaseApiController
         res2.Where(x => user.SavedJobs.Contains(x.Id)).ToList().ForEach(x => x.IsSaved = true);
 
 
-        return (res2.Count == 0) ? NotFound() : res2;
+        return (res3.Count == 0) ? NotFound() : res3;
     }
 
 

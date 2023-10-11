@@ -20,6 +20,7 @@ public class AppUser
     public string Phone { get; set; }
     public string LinkedinLink { get; set; }
     public string WebsiteLink { get; set; }
+    public bool ShowMe { get; set; } = true;
     public bool Deleted { get; set; } = false;
 
     [Column("SavedJobs")]

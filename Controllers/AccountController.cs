@@ -42,7 +42,7 @@ public class AccountController(DataContext Context, ITokenService TokenService) 
         return new UserDto
         {
             UserName = user.UserName,
-            Token = TokenService.CreateToken(user.UserName, "user"),
+            Token = TokenService.CreateToken(user.UserName, Roles.User),
             KnownAs = user.KnownAs
         };
     }
@@ -65,7 +65,7 @@ public class AccountController(DataContext Context, ITokenService TokenService) 
         return new UserDto
         {
             UserName = user.UserName,
-            Token = TokenService.CreateToken(user.UserName, "user"),
+            Token = TokenService.CreateToken(user.UserName,Roles.User),
             KnownAs = user.KnownAs
         };
     }
@@ -89,7 +89,7 @@ public class AccountController(DataContext Context, ITokenService TokenService) 
         // Send new token if userName changed
         return (await Context.SaveChangesAsync()) > 0 ?
             (isChangeName ?
-                Ok(new UserDto { UserName = user.UserName, Token = TokenService.CreateToken(user.UserName, "user"), KnownAs = user.KnownAs })
+                Ok(new UserDto { UserName = user.UserName, Token = TokenService.CreateToken(user.UserName, Roles.User), KnownAs = user.KnownAs })
                 :
                 NoContent())
             : BadRequest("failed to update user.");

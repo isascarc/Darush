@@ -3,7 +3,7 @@ using ClosedXML.Excel;
 
 namespace MyJob.Controllers;
 
-[Authorize(Roles = "user")]
+[Authorize(Roles = Roles.User)]
 [Route("user/cv")]
 public class CvController(DataContext Context) : BaseApiController
 {
